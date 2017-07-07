@@ -4,6 +4,7 @@ contract LowestUniqeNumberGame{
     address owner;
     
     bool isActive = true;
+    bool finalPayout = false;
     uint profitPercent = 5;
     uint periodLegth = 5000; //slightly less than a day
     uint numberPrice = 0.001 ether;
@@ -93,6 +94,9 @@ contract LowestUniqeNumberGame{
     function claimPrize(uint roundID) {
         if(roundID + 2 > roundList.length) throw;
         if(roundList[roundID].prizeClaimed) throw;
+        if(msg.sender != roundList[roundID].winner) throw;
+        if(!msg.sender.send(roundList[roundID].value)) throw;
+        roundList[roundID].prizeClaimed = true;
         
     }
 }

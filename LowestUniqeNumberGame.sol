@@ -1,11 +1,10 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.13;
 
 contract LowestUniqeNumberGame{
     address owner;
     
-    bool isActive = true;
-    bool finalPayout = false;
-    uint profitPercent = 5;
+    bool deactivated = false;
+    uint edgePercent = 5;
     uint periodLegth = 5000; //slightly less than a day
     uint numberPrice = 0.001 ether;
     Round[] roundList;
@@ -21,12 +20,26 @@ contract LowestUniqeNumberGame{
         uint value;
     }
     
+    function LowestUniqeNumberGame() {
+        owner = msg.sender;
+    }
+    
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    
+    modifier onlyActive {
+        require(!deactivated);
+        _;
+    }
+    
     function checkForActiveGamePeriod() constant returns (bool){
         bool result;
         if (roundList.length == 0) 
         {
             result = false;
-        } else if (roundList[roundList.length-1].startBlock + periodLegth >= now) {
+        } else if (roundList[roundList.length-1].startBlock + periodLegth >= block.number) {
             result = true;
         } else {
             result = false;
@@ -35,7 +48,7 @@ contract LowestUniqeNumberGame{
     }
     
     function hashNumber(uint number, string password) constant returns (bytes32){
-        if(number == 0) throw;
+        require(number != 0);
         return sha3(number, password);
     }
     
@@ -50,37 +63,37 @@ contract LowestUniqeNumberGame{
     }
     
     function payBackDifference(uint number, bytes32 hash) internal returns (bool){
-         uint cost = number * numberPrice;
-         uint payment = roundList[roundList.length-2].payments[hash];
-         if(payment < cost) throw;
-         uint difference = payment - cost;
-         if(!msg.sender.send(difference)) throw;
-         delete roundList[roundList.length-2].payments[hash];
-         roundList[roundList.length-2].value -= difference;
+        uint cost = number * numberPrice;
+        uint payment = roundList[roundList.length-2].payments[hash];
+        require(payment >= cost);
+        uint difference = payment - cost;
+        msg.sender.transfer(difference);
+        roundList[roundList.length-2].payments[hash] = cost;
+        roundList[roundList.length-2].value -= difference;
     }
     
-    function startNewRound() {
+    function startNewRound() internal{
         roundList.push(newRound());
     }
     
-    function submitSecretNumber(bytes32 hash) payable {
+    function submitSecretNumber(bytes32 hash) payable onlyActive{
         if (!checkForActiveGamePeriod()) {
             startNewRound();
         }
         Round activeRound = roundList[roundList.length-1];
-        if(msg.value < numberPrice) throw;
+        require(msg.value >= numberPrice);
         activeRound.secretNumbers[hash] = msg.sender;
         activeRound.payments[hash] = msg.value;
     }
     
-    function uncoverNumber(bytes32 hash, uint number, string password) {
+    function uncoverNumber(bytes32 hash, uint number, string password) onlyActive{
         if (!checkForActiveGamePeriod()) {
             startNewRound();
         }
         Round roundToUncover = roundList[roundList.length-2];
-        if(roundToUncover.secretNumbers[hash] != msg.sender) throw;
-        if(hash != hashNumber(number, password)) throw;
-        if(!checkIfPriceWasPayed(number, hash)) throw;
+        require(roundToUncover.secretNumbers[hash] == msg.sender);
+        require(hash == hashNumber(number, password));
+        require(checkIfPriceWasPayed(number, hash));
         payBackDifference(number, hash);
         if(roundToUncover.numbersPlayed[number] == false) {
             roundToUncover.numbersPlayed[number] = true;
@@ -92,11 +105,20 @@ contract LowestUniqeNumberGame{
     }
     
     function claimPrize(uint roundID) {
-        if(roundID + 2 > roundList.length) throw;
-        if(roundList[roundID].prizeClaimed) throw;
-        if(msg.sender != roundList[roundID].winner) throw;
-        if(!msg.sender.send(roundList[roundID].value)) throw;
+        require(roundID != roundList.length-1 && roundID != roundList.length-2); //the two newest rounds are excluded
+        require(!roundList[roundID].prizeClaimed);
+        require(msg.sender == roundList[roundID].winner);
+        msg.sender.transfer(roundList[roundID].value);
         roundList[roundID].prizeClaimed = true;
         
     }
+    
+    function finalPayout(uint roundID, bytes32 hash) {
+        require(deactivated);
+        require(roundID == roundList.length-1 || roundID == roundList.length-2); // only last two rounds, older rounds have only prizes for the winners
+        require(roundList[roundID].secretNumbers[hash] == msg.sender);
+        msg.sender.transfer(roundList[roundID].payments[hash]);
+        roundList[roundID].payments[hash]=0;
+    }
+    
 }

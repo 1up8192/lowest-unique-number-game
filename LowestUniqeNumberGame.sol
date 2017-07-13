@@ -1,13 +1,21 @@
 pragma solidity ^0.4.13;
 
 contract LowestUniqeNumberGame{
+    
     address owner;
+    uint stash;
     
     bool deactivated = false;
-    uint edgePercent = 5;
-    uint periodLegth = 5000; //slightly less than a day
-    uint numberPrice = 0.001 ether;
+    Rules rules = Rules({edgePercent: 5, periodLength: 5000, /*slightly less than a day*/ numberPrice: 0.001 ether});
     Round[] roundList;
+    Rules newRules = rules;
+    bool ruleUpdateNeeded = false;
+    
+    struct Rules{
+        uint edgePercent;
+        uint periodLength;
+        uint numberPrice;
+    }
     
     struct Round{
         mapping(bytes32=>address) secretNumbers;
@@ -39,7 +47,7 @@ contract LowestUniqeNumberGame{
         if (roundList.length == 0) 
         {
             result = false;
-        } else if (roundList[roundList.length-1].startBlock + periodLegth >= block.number) {
+        } else if (roundList[roundList.length-1].startBlock + rules.periodLength >= block.number) {
             result = true;
         } else {
             result = false;
@@ -53,17 +61,18 @@ contract LowestUniqeNumberGame{
     }
     
     function newRound() internal constant returns (Round){
-        return Round(block.number, 0x0, 0, false, 0);
+        return Round({startBlock: block.number, winner: 0x0, smallestNumber: 0, prizeClaimed: false, value: 0});
+        if(ruleUpdateNeeded) updateRules();
     }    
     
     function checkIfPriceWasPayed(uint number, bytes32 hash) internal constant returns (bool){
-        uint cost = number * numberPrice;
+        uint cost = number * rules.numberPrice;
         if(roundList[roundList.length-2].payments[hash] < cost) return false;
         else return true;
     }
     
     function payBackDifference(uint number, bytes32 hash) internal returns (bool){
-        uint cost = number * numberPrice;
+        uint cost = number * rules.numberPrice;
         uint payment = roundList[roundList.length-2].payments[hash];
         require(payment >= cost);
         uint difference = payment - cost;
@@ -81,7 +90,7 @@ contract LowestUniqeNumberGame{
             startNewRound();
         }
         Round activeRound = roundList[roundList.length-1];
-        require(msg.value >= numberPrice);
+        require(msg.value >= rules.numberPrice);
         activeRound.secretNumbers[hash] = msg.sender;
         activeRound.payments[hash] = msg.value;
     }
@@ -97,7 +106,7 @@ contract LowestUniqeNumberGame{
         payBackDifference(number, hash);
         if(roundToUncover.numbersPlayed[number] == false) {
             roundToUncover.numbersPlayed[number] = true;
-            if(roundToUncover.smallestNumber > number) {
+            if(roundToUncover.smallestNumber > number || roundToUncover.smallestNumber == 0) {
                 roundToUncover.smallestNumber = number;
                 roundToUncover.winner = msg.sender;
             }
@@ -108,7 +117,11 @@ contract LowestUniqeNumberGame{
         require(roundID != roundList.length-1 && roundID != roundList.length-2); //the two newest rounds are excluded
         require(!roundList[roundID].prizeClaimed);
         require(msg.sender == roundList[roundID].winner);
-        msg.sender.transfer(roundList[roundID].value);
+        uint fullValue = roundList[roundID].value;
+        uint edge = fullValue / 100 * rules.edgePercent;
+        uint prize = fullValue - edge;
+        stash += edge;
+        msg.sender.transfer(prize);
         roundList[roundID].prizeClaimed = true;
         
     }
@@ -119,6 +132,36 @@ contract LowestUniqeNumberGame{
         require(roundList[roundID].secretNumbers[hash] == msg.sender);
         msg.sender.transfer(roundList[roundID].payments[hash]);
         roundList[roundID].payments[hash]=0;
+    }
+    
+    function cashOut(uint amount) onlyOwner{
+        uint actualAmount;
+        if(amount == 0 || amount > stash){
+            actualAmount = stash; 
+        } else {
+            actualAmount = amount;
+        }
+        owner.transfer(actualAmount);
+    }
+    
+    function setEdgePercent(uint newEdgePercent) onlyOwner {
+        newRules.edgePercent = newEdgePercent;
+        ruleUpdateNeeded = true;
+    }
+    
+    function setPeriodLength(uint newPeriodLength) onlyOwner {
+        newRules.periodLength = newPeriodLength;
+        ruleUpdateNeeded = true;
+    }
+    
+    function setNumberPrice(uint newNumberPrice) onlyOwner {
+        newRules.numberPrice = newNumberPrice;
+        ruleUpdateNeeded = true;
+    }
+    
+    function updateRules() internal{
+        rules = newRules;
+        ruleUpdateNeeded = false;
     }
     
 }

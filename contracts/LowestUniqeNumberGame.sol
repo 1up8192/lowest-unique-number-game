@@ -161,6 +161,26 @@ contract LowestUniqeNumberGame {
         ruleUpdateNeeded = true;
     }
 
+    function getEdgePercent() constant returns (uint) {
+        return rules.edgePercent;
+    }
+
+    function getPeriodLength() constant returns (uint) {
+        return rules.periodLength;
+    }
+
+    function getNumberPrice() constant returns (uint) {
+        return rules.numberPrice;
+    }
+
+    function getNumberOfRounds() constant returns (uint) {
+        return roundList.length;
+    }
+
+    function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) constant returns (address){
+        return roundList[roundID].secretNumbers[hash];
+    }
+
     function updateRules() internal{
         rules = newRules;
         ruleUpdateNeeded = false;

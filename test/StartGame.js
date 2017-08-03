@@ -13,7 +13,7 @@ contract( "LowestUniqeNumberGame", function(accounts) {
     return LowestUniqeNumberGame.deployed().then(function(instance){
       lung = instance;
       return TestHelpers.deployed();
-    })then(function(helperInstance){
+    }).then(function(helperInstance){
       testHelpers = helperInstance;
       return lung.hashNumber.call(1, "password");
     }).then(function(_hash){
@@ -31,7 +31,7 @@ contract( "LowestUniqeNumberGame", function(accounts) {
       address = _address;
 
       assert.equal(numberOfRounds, 1, "numberOfRounds wasnt 1");
-      assert.equal(address, addresses[0], "guess with given address wasnt found");
+      assert.equal(address, accounts[0], "guess with given address wasnt found");
     });
 
   });

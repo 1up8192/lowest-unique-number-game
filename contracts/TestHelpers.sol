@@ -1,26 +1,26 @@
 pragma solidity ^0.4.11;
-import "./LowestUniqeNumberGame.sol";
+import "./LowestUniqueNumberGame.sol";
 
-contract TestHelpers is LowestUniqeNumberGame{
+contract TestHelpers is LowestUniqueNumberGame{
 
     function getEdgePercent() constant returns (uint) {
-        LowestUniqeNumberGame.checkForActiveGamePeriod();
-        return LowestUniqeNumberGame.rules.edgePercent;
+        LowestUniqueNumberGame.checkForActiveGamePeriod();
+        return LowestUniqueNumberGame.rules.edgePercent;
     }
 
     function getPeriodLength() constant returns (uint) {
-        return LowestUniqeNumberGame.rules.periodLength;
+        return LowestUniqueNumberGame.rules.periodLength;
     }
 
     function getNumberPrice() constant returns (uint) {
-        return LowestUniqeNumberGame.rules.numberPrice;
+        return LowestUniqueNumberGame.rules.numberPrice;
     }
 
     function getNumberOfRounds() constant returns (uint) {
-        return LowestUniqeNumberGame.roundList.length;
+        return LowestUniqueNumberGame.roundList.length;
     }
 
     function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) constant returns (address){
-        return LowestUniqeNumberGame.roundList[roundID].secretNumbers[hash];
+        return LowestUniqueNumberGame.roundList[roundID].secretNumbers[hash];
     }
 }

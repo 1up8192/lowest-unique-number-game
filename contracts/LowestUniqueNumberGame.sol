@@ -1,13 +1,13 @@
 pragma solidity ^0.4.11;
 import "./SafeMath.sol";
 
-contract LowestUniqeNumberGame {
+contract LowestUniqueNumberGame {
 
     address owner;
     uint stash;
 
     bool deactivated = false;
-    Rules rules = Rules({edgePercent: 5, periodLength: 5000, /*slightly less than a day*/ numberPrice: 0.001 ether});
+    Rules rules = Rules({edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether});
     Round[] roundList;
     Rules newRules = rules;
     bool ruleUpdateNeeded = false;
@@ -22,7 +22,7 @@ contract LowestUniqeNumberGame {
         mapping(bytes32=>address) secretNumbers;
         mapping(bytes32=>uint) payments;
         mapping(uint=>bool) numbersPlayed;
-        uint startBlock;
+        uint startTime;
         address winner;
         uint smallestNumber;
         bool prizeClaimed;
@@ -48,7 +48,7 @@ contract LowestUniqeNumberGame {
         if (roundList.length == 0)
         {
             result = false;
-        } else if ( roundList[SafeMath.safeSub(roundList.length, 1)].startBlock + rules.periodLength >= block.number) {
+        } else if ( roundList[SafeMath.safeSub(roundList.length, 1)].startTime + rules.periodLength >= block.timestamp) {
             result = true;
         } else {
             result = false;
@@ -62,7 +62,7 @@ contract LowestUniqeNumberGame {
     }
 
     function newRound() internal constant returns (Round){
-        return Round({startBlock: block.number, winner: 0x0, smallestNumber: 0, prizeClaimed: false, value: 0});
+        return Round({startTime: block.timestamp, winner: 0x0, smallestNumber: 0, prizeClaimed: false, value: 0});
         if(ruleUpdateNeeded) updateRules();
     }
 

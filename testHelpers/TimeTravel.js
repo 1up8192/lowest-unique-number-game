@@ -15,11 +15,4 @@ var timeTravel = {
 	  web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_increaseTime", params: [seconds], id: new Date().getTime()});
 	},
 
-	blocksForward: function(blocks){
-	  detectBlocktime()
-	  var seconds = blockTime * blocks;
-	  web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_increaseTime", params: [seconds], id: new Date().getTime()});
-	}
-}
-
 module.exports = timeTravel;

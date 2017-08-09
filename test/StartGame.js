@@ -1,5 +1,5 @@
-var LowestUniqeNumberGame = artifacts.require("LowestUniqeNumberGame");
-var TestHelpers = artifacts.require("LowestUniqeNumberGame");
+var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
+var TestHelpers = artifacts.require("LowestUniqueNumberGame");
 
 contract( "LowestUniqeNumberGame", function(accounts) {
   it("should start a new game", function(){

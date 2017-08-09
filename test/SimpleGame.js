@@ -2,7 +2,7 @@ var timeTravel = require('../testHelpers/TimeTravel.js');
 var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
 var TestHelpers = artifacts.require("LowestUniqueNumberGame");
 
-contract( "LowestUniqeNumberGame", function(accounts) {
+contract( "LowestUniqueNumberGame", function(accounts) {
   it("smaller guess should win", function(){
     var lung;
     var testHelpers;
@@ -13,7 +13,7 @@ contract( "LowestUniqeNumberGame", function(accounts) {
     var hash2;
     var numberOfRounds;
     var address;
-    return LowestUniqeNumberGame.deployed().then(function(instance){
+    return LowestUniqueNumberGame.deployed().then(function(instance){
       lung = instance;
       return TestHelpers.deployed();
     }).then(function(helperInstance){

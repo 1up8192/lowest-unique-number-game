@@ -1,7 +1,7 @@
 pragma solidity ^0.4.11;
 import "./SafeMath.sol";
 
-contract LowestUniqeNumberGame {
+contract LowestUniqueNumberGame {
 
     address owner;
     uint stash;
@@ -29,7 +29,7 @@ contract LowestUniqeNumberGame {
         uint value;
     }
 
-    function LowestUniqeNumberGame() {
+    function LowestUniqueNumberGame() {
         owner = msg.sender;
     }
 

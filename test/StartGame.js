@@ -1,7 +1,7 @@
 var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
 var TestHelpers = artifacts.require("LowestUniqueNumberGame");
 
-contract( "LowestUniqeNumberGame", function(accounts) {
+contract( "LowestUniqueNumberGame", function(accounts) {
   it("should start a new game", function(){
     var lung;
     var testHelpers;
@@ -10,7 +10,7 @@ contract( "LowestUniqeNumberGame", function(accounts) {
     var hash;
     var numberOfRounds;
     var address;
-    return LowestUniqeNumberGame.deployed().then(function(instance){
+    return LowestUniqueNumberGame.deployed().then(function(instance){
       lung = instance;
       return TestHelpers.deployed();
     }).then(function(helperInstance){

@@ -27,10 +27,9 @@ contract( "LowestUniqueNumberGame", function(accounts) {
       return testHelpers.getNumberPrice.call();
     }).then(function(_numberPrice){
       numberPrice = _numberPrice.toNumber();
-      return lung.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number1});
+      return lung.submitSecretNumber(hash1, {from: accounts[0], value: numberPrice * number1});
     }).then(function(_numberPrice){
-      numberPrice = _numberPrice.toNumber();
-      return lung.submitSecretNumber(hash, {from: accounts[1], value: numberPrice * number2});
+      return lung.submitSecretNumber(hash2, {from: accounts[1], value: numberPrice * number2});
     }).then(function(){
       return timeTravel.secondsForward(60*60*24); //one day later...
     }).then(function(){
@@ -40,7 +39,7 @@ contract( "LowestUniqueNumberGame", function(accounts) {
     }).then(function(){
       return timeTravel.secondsForward(60*60*24); //one day later...
     }).then(function(){
-      return TestHelpers.getWinner(0);
+      return testHelpers.getWinner.call(0);
     }).then(function(winnerAddress){
       assert.equal(winnerAddress, accounts[0], "first player (acc0) should be the winner");
 

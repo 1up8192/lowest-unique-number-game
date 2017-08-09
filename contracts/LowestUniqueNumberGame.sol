@@ -1,7 +1,7 @@
 pragma solidity ^0.4.11;
 import "./SafeMath.sol";
 
-contract LowestUniqueNumberGame {
+contract LowestUniqeNumberGame {
 
     address owner;
     uint stash;
@@ -97,10 +97,11 @@ contract LowestUniqueNumberGame {
         activeRound.payments[hash] = msg.value;
     }
 
-    function uncoverNumber(bytes32 hash, uint number, string password) onlyActive{
+    function uncoverNumber(uint number, string password) onlyActive{
         if (!checkForActiveGamePeriod()) {
             startNewRound();
         }
+        bytes32 hash = hashNumber(number, password);
         Round roundToUncover = roundList[SafeMath.safeSub(roundList.length, 2)];
         require(roundToUncover.secretNumbers[hash] == msg.sender);
         require(hash == hashNumber(number, password));

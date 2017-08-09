@@ -13,6 +13,7 @@ var timeTravel = {
 	secondsForward: function(seconds){
 	  detectBlocktime()
 	  web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_increaseTime", params: [seconds], id: new Date().getTime()});
+    return seconds;
 	},
 
 module.exports = timeTravel;

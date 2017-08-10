@@ -1,6 +1,6 @@
-var SafeMath = artifacts.require("./SafeMath.sol");
-var LowestUniqueNumberGame = artifacts.require("./LowestUniqueNumberGame.sol");
-var TestHelpers = artifacts.require("./TestHelpers.sol")
+var SafeMath = artifacts.require("SafeMath");
+var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
+var TestHelpers = artifacts.require("TestHelpers")
 
 module.exports = function(deployer) {
   deployer.deploy(SafeMath);

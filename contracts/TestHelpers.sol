@@ -2,6 +2,9 @@ pragma solidity ^0.4.11;
 import "./LowestUniqueNumberGame.sol";
 
 contract TestHelpers is LowestUniqueNumberGame{
+    function getWinner(uint roundID) constant returns (address){
+        return LowestUniqueNumberGame.roundList[roundID].winner;
+    }
 
     function getEdgePercent() constant returns (uint) {
         LowestUniqueNumberGame.checkForActiveGamePeriod();
@@ -22,9 +25,5 @@ contract TestHelpers is LowestUniqueNumberGame{
 
     function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) constant returns (address){
         return LowestUniqueNumberGame.roundList[roundID].secretNumbers[hash];
-    }
-
-    function getWinner(uint roundID) constant returns (address){
-        return LowestUniqueNumberGame.roundList[roundID].winner;
     }
 }

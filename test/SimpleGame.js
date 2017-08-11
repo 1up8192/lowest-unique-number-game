@@ -1,6 +1,6 @@
 var timeTravel = require('../timetravel/TimeTravel.js');
 var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
-//var TestHelpers = artifacts.require("TestHelpers");
+var TestHelpers = artifacts.require("TestHelpers");
 
 contract( "LowestUniqueNumberGame", function(accounts) {
   it("smaller guess should win", function(){
@@ -15,9 +15,9 @@ contract( "LowestUniqueNumberGame", function(accounts) {
     var address;
     return LowestUniqueNumberGame.deployed().then(function(instance){
       lung = instance;
-      /*return TestHelpers.deployed();
+      return TestHelpers.deployed();
     }).then(function(helperInstance){
-      testHelpers = helperInstance;*/
+      testHelpers = helperInstance;
       return lung.hashNumber.call(number1, "password");
     }).then(function(_hash){
       hash1 = _hash;

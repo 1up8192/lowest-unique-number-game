@@ -2,6 +2,7 @@ pragma solidity ^0.4.11;
 import "./LowestUniqueNumberGame.sol";
 
 contract TestHelpers is LowestUniqueNumberGame{
+
     function getWinner(uint roundID) constant returns (address){
         return LowestUniqueNumberGame.roundList[roundID].winner;
     }

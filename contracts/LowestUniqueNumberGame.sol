@@ -8,7 +8,7 @@ contract LowestUniqueNumberGame {
 
     bool deactivated = false;
     Rules rules = Rules({edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether});
-    Round[] roundList;
+    Round[] public roundList;
     Rules newRules = rules;
     bool ruleUpdateNeeded = false;
 
@@ -162,7 +162,17 @@ contract LowestUniqueNumberGame {
         ruleUpdateNeeded = true;
     }
 
+    function updateRules() internal{
+        rules = newRules;
+        ruleUpdateNeeded = false;
+    }
+
+    function getWinner(uint roundID) constant returns (address){
+        return roundList[roundID].winner;
+    }
+
     function getEdgePercent() constant returns (uint) {
+        LowestUniqueNumberGame.checkForActiveGamePeriod();
         return rules.edgePercent;
     }
 
@@ -180,11 +190,6 @@ contract LowestUniqueNumberGame {
 
     function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) constant returns (address){
         return roundList[roundID].secretNumbers[hash];
-    }
-
-    function updateRules() internal{
-        rules = newRules;
-        ruleUpdateNeeded = false;
     }
 
 }

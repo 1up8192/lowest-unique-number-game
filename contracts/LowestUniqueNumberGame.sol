@@ -116,8 +116,14 @@ contract LowestUniqueNumberGame {
         }
     }
 
+    function checkIfClaimable(uint roundID) constant returns (bool){
+      bool result = (roundID != SafeMath.safeSub(roundList.length, 1) && /*it can not be the most recent round*/
+      (roundID != SafeMath.safeSub(roundList.length, 2) || !checkForActiveGamePeriod()) ); /*it can only be the second recent round if there is no active game in the first round*/
+      return result;
+    }
+
     function claimPrize(uint roundID) {
-        require(roundID != SafeMath.safeSub(roundList.length, 1) && roundID != SafeMath.safeSub(roundList.length, 2)); //the two newest rounds are excluded
+        require(checkIfClaimable(roundID));
         require(!roundList[roundID].prizeClaimed);
         require(msg.sender == roundList[roundID].winner);
         uint fullValue = roundList[roundID].value;

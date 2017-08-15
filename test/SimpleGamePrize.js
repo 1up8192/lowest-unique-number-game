@@ -3,7 +3,7 @@ var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
 var TestHelpers = artifacts.require("TestHelpers");
 
 contract( "LowestUniqueNumberGame", function(accounts) {
-  it("smaller guess should win", function(){
+  it("winner should recieve correct prize", function(){
     var lung;
     var testHelpers;
     var number1 = 1;
@@ -13,6 +13,9 @@ contract( "LowestUniqueNumberGame", function(accounts) {
     var hash2;
     var numberOfRounds;
     var address;
+    var prizeExpected;
+    var balanceBefore;
+    var balanceAfter
     return LowestUniqueNumberGame.deployed().then(function(instance){
       lung = instance;
       return TestHelpers.deployed();
@@ -39,10 +42,26 @@ contract( "LowestUniqueNumberGame", function(accounts) {
     }).then(function(){
       return timeTravel.secondsForward(60*60*24); //one day later...
     }).then(function(){
-      return lung.getWinner.call(0);
-    }).then(function(winnerAddress){
-      assert.equal(winnerAddress, accounts[0], "first player (acc0) should be the winner");
-
+      return lung.getEdgePercent.call();
+    }).then(function(edgePercent){
+      prizeExpected = (number1 + number2) * numberPrice / 100 * (100 - edgePercent);
+      return web3.eth.getBalance(accounts[0]);
+    }).then(function(_balanceBefore){
+      balanceBefore = _balanceBefore;
+      return lung.claimPrize(0, {from: accounts[0]});
+    }).then(function(){
+      return lung.getNumberOfRounds.call();
+    }).then(function(roundNumber){
+      console.log("number of rounds: " + roundNumber);
+      return web3.eth.getBalance(accounts[0]);
+    }).then(function(_balanceAfter){
+      balanceAfter = _balanceAfter;
+      var difference = after - before;
+      console.log("balanceAfter: " + balanceAfter);
+      console.log("balanceBefore: " + balanceBefore);
+      console.log("difference: " + difference);
+      console.log("expected: " + prizeExpected);
+      assert.equal(difference, prizeExpected, "prize should arrive");
     });
 
   });

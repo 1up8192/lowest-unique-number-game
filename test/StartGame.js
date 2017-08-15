@@ -18,21 +18,21 @@ contract( "LowestUniqueNumberGame", function(accounts) {
       return lung.hashNumber.call(1, "password");
     }).then(function(_hash){
       hash = _hash;
-      return testHelpers.getNumberPrice.call();
+      return lung.getNumberPrice.call();
     }).then(function(_numberPrice){
       numberPrice = _numberPrice.toNumber();
       return lung.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number});
     }).then(function(){
-      return testHelpers.getNumberOfRounds.call();
-      assert.equal(1, 1, "okay");/*
+      return lung.getNumberOfRounds.call();
+      /*assert.equal(1, 1, "okay");*/
     }).then(function(_numberOfRounds){
       numberOfRounds = _numberOfRounds.toNumber();
-      return testHelpers.getSenderByRoundIDAndHash.call(0, hash);
+      return lung.getSenderByRoundIDAndHash.call(0, hash);
     }).then(function(_address){
       address = _address;
 
       assert.equal(numberOfRounds, 1, "numberOfRounds wasnt 1");
-      assert.equal(address, accounts[0], "guess with given address wasnt found");*/
+      assert.equal(address, accounts[0], "guess with given address wasnt found");
     });
   });
 });

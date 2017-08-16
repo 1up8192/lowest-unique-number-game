@@ -29,6 +29,8 @@ contract LowestUniqueNumberGame {
         uint value;
     }
 
+    event prizeClaimed(uint indexed prize);
+
     function LowestUniqueNumberGame() {
         owner = msg.sender;
     }
@@ -131,6 +133,7 @@ contract LowestUniqueNumberGame {
         uint prize = fullValue - edge;
         stash += edge;
         msg.sender.transfer(prize);
+        prizeClaimed(prize);
         roundList[roundID].prizeClaimed = true;
 
     }

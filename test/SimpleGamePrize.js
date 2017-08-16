@@ -2,7 +2,7 @@ var timeTravel = require('../timetravel/TimeTravel.js');
 var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
 var TestHelpers = artifacts.require("TestHelpers");
 
-contract( "LowestUniqueNumberGame", function(accounts) {
+contract( "simple game prize test", function(accounts) {
   it("winner should recieve correct prize", function(){
     var lung;
     var testHelpers;
@@ -15,7 +15,10 @@ contract( "LowestUniqueNumberGame", function(accounts) {
     var address;
     var prizeExpected;
     var balanceBefore;
-    var balanceAfter
+    var balanceAfter;
+    var gasUsed;
+    var gasPrice;
+    var gain;
     return LowestUniqueNumberGame.deployed().then(function(instance){
       lung = instance;
       return TestHelpers.deployed();
@@ -49,19 +52,33 @@ contract( "LowestUniqueNumberGame", function(accounts) {
     }).then(function(_balanceBefore){
       balanceBefore = _balanceBefore;
       return lung.claimPrize(0, {from: accounts[0]});
-    }).then(function(){
+    }).then(function(result){
+      console.log(result);
+      var prizeClaimedEvent = lung.prizeClaimed({some: 'args'}, {fromBlock: 0, toBlock: 'latest'})
+      gasUsed = result.receipt.gasUsed;
+      gasPrice = web3.eth.gasPrice;
+      var executionCost = gasUsed * gasPrice;
+      console.log("executionCost: " + executionCost);
+      gain = prizeExpected - executionCost;
+      return prizeClaimedEvent.get(function(error, logs)
+      {
+        console.log("1:" + logs);
+        return logs;
+       });
+    }).then(function(result){
+      console.log("2:" + result);
       return lung.getNumberOfRounds.call();
     }).then(function(roundNumber){
       console.log("number of rounds: " + roundNumber);
       return web3.eth.getBalance(accounts[0]);
     }).then(function(_balanceAfter){
       balanceAfter = _balanceAfter;
-      var difference = after - before;
+      var difference = balanceAfter.minus(balanceBefore).toNumber();
       console.log("balanceAfter: " + balanceAfter);
       console.log("balanceBefore: " + balanceBefore);
       console.log("difference: " + difference);
       console.log("expected: " + prizeExpected);
-      assert.equal(difference, prizeExpected, "prize should arrive");
+      assert.equal(difference, gain, "prize should arrive");
     });
 
   });

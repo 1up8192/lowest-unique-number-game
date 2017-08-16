@@ -1,7 +1,7 @@
 var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
 var TestHelpers = artifacts.require("TestHelpers");
 
-contract( "LowestUniqueNumberGame", function(accounts) {
+contract( "start game test", function(accounts) {
   it("should start a new game", function(){
     var lung;
     var testHelpers;

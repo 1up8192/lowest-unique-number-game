@@ -2,7 +2,7 @@
 var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
 var TestHelpers = artifacts.require("TestHelpers");
 
-contract( "LowestUniqueNumberGame", function(accounts) {
+contract( "simple game winner test", function(accounts) {
   it("smaller guess should win", function(){
     var lung;
     var testHelpers;
@@ -46,4 +46,5 @@ contract( "LowestUniqueNumberGame", function(accounts) {
     });
 
   });
-});*/
+});
+*/

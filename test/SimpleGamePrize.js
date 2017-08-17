@@ -54,16 +54,17 @@ contract( "simple game prize test", function(accounts) {
       return lung.claimPrize(0, {from: accounts[0]});
     }).then(function(result){
       console.log(result);
-      var prizeClaimedEvent = lung.prizeClaimed({some: 'args'}, {fromBlock: 0, toBlock: 'latest'})
+      var prizeClaimedEvent = lung.prizeClaimed(/*{fromBlock: 0, toBlock: 'latest'}*/)
       gasUsed = result.receipt.gasUsed;
       gasPrice = web3.eth.gasPrice;
       var executionCost = gasUsed * gasPrice;
       console.log("executionCost: " + executionCost);
       gain = prizeExpected - executionCost;
-      return prizeClaimedEvent.get(function(error, logs)
+      return prizeClaimedEvent.get(function(error, result)
       {
-        console.log("1:" + logs);
-        return logs;
+        console.log("1:" + result);
+        console.log(result.args.prize.valueOf());
+        return result;
        });
     }).then(function(result){
       console.log("2:" + result);

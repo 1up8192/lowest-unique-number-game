@@ -1,4 +1,4 @@
-/*var timeTravel = require('../timetravel/TimeTravel.js');
+var timeTravel = require('../timetravel/TimeTravel.js');
 var LowestUniqueNumberGame = artifacts.require("LowestUniqueNumberGame");
 var TestHelpers = artifacts.require("TestHelpers");
 
@@ -47,4 +47,3 @@ contract( "simple game winner test", function(accounts) {
 
   });
 });
-*/

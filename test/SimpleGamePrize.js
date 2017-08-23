@@ -19,6 +19,7 @@ contract( "simple game prize test", function(accounts) {
     var gasUsed;
     var gasPrice;
     var gain;
+    var actualPrize;
     return LowestUniqueNumberGame.deployed().then(function(instance){
       lung = instance;
       return TestHelpers.deployed();
@@ -48,38 +49,35 @@ contract( "simple game prize test", function(accounts) {
       return lung.getEdgePercent.call();
     }).then(function(edgePercent){
       prizeExpected = (number1 + number2) * numberPrice / 100 * (100 - edgePercent);
+      return lung.getRoundValue.call(0);
+    }).then(function(roundValue){
       return web3.eth.getBalance(accounts[0]);
     }).then(function(_balanceBefore){
       balanceBefore = _balanceBefore;
       return lung.claimPrize(0, {from: accounts[0]});
     }).then(function(result){
-      console.log(result);
-      var prizeClaimedEvent = lung.prizeClaimed(/*{fromBlock: 0, toBlock: 'latest'}*/)
       gasUsed = result.receipt.gasUsed;
       gasPrice = web3.eth.gasPrice;
       var executionCost = gasUsed * gasPrice;
-      console.log("executionCost: " + executionCost);
       gain = prizeExpected - executionCost;
-      return prizeClaimedEvent.get(function(error, result)
-      {
-        console.log("1:" + result);
-        console.log(result.args.prize.valueOf());
-        return result;
-       });
-    }).then(function(result){
-      console.log("2:" + result);
+
+    }).then(function(){
       return lung.getNumberOfRounds.call();
     }).then(function(roundNumber){
-      console.log("number of rounds: " + roundNumber);
       return web3.eth.getBalance(accounts[0]);
     }).then(function(_balanceAfter){
       balanceAfter = _balanceAfter;
       var difference = balanceAfter.minus(balanceBefore).toNumber();
-      console.log("balanceAfter: " + balanceAfter);
-      console.log("balanceBefore: " + balanceBefore);
-      console.log("difference: " + difference);
-      console.log("expected: " + prizeExpected);
-      assert.equal(difference, gain, "prize should arrive");
+
+      var prizeClaimedEvent = lung.prizeClaimed();
+      return prizeClaimedEvent.get(function(error, result)
+      {
+        actualPrize = result[0].args.prize.toNumber();
+        return;
+       });
+
+      assert.equal(actualPrize, prizeExpected, "prize should be as calculated")
+      assert.equal(difference, gain, "account balance should be correct after prize arrived");
     });
 
   });

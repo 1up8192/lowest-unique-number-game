@@ -97,6 +97,7 @@ contract LowestUniqueNumberGame {
         require(msg.value >= rules.numberPrice);
         activeRound.secretNumbers[hash] = msg.sender;
         activeRound.payments[hash] = msg.value;
+        activeRound.value += msg.value;
     }
 
     function uncoverNumber(uint number, string password) onlyActive{
@@ -199,6 +200,10 @@ contract LowestUniqueNumberGame {
 
     function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) constant returns (address){
         return roundList[roundID].secretNumbers[hash];
+    }
+
+    function getRoundValue(uint roundID) constant returns (uint){
+        return roundList[roundID].value;
     }
 
 }

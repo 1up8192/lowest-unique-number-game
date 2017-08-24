@@ -76,7 +76,7 @@ contract LowestUniqueNumberGame {
 
     function payBackDifference(uint number, bytes32 hash) internal returns (bool){
         uint cost = number * rules.numberPrice;
-        Round roundToPayBack = roundList[SafeMath.safeSub(roundList.length, 2)];
+        Round storage roundToPayBack = roundList[SafeMath.safeSub(roundList.length, 2)];
         uint payment = roundToPayBack.payments[hash];
         require(payment >= cost);
         uint difference = payment - cost;
@@ -93,7 +93,7 @@ contract LowestUniqueNumberGame {
         if (!checkForActiveGamePeriod()) {
             startNewRound();
         }
-        Round activeRound = roundList[SafeMath.safeSub(roundList.length, 1)];
+        Round storage activeRound = roundList[SafeMath.safeSub(roundList.length, 1)];
         require(msg.value >= rules.numberPrice);
         activeRound.secretNumbers[hash] = msg.sender;
         activeRound.payments[hash] = msg.value;
@@ -105,7 +105,7 @@ contract LowestUniqueNumberGame {
             startNewRound();
         }
         bytes32 hash = hashNumber(number, password);
-        Round roundToUncover = roundList[SafeMath.safeSub(roundList.length, 2)];
+        Round storage roundToUncover = roundList[SafeMath.safeSub(roundList.length, 2)];
         require(roundToUncover.secretNumbers[hash] == msg.sender);
         require(hash == hashNumber(number, password));
         require(checkIfPriceWasPayed(number, hash));

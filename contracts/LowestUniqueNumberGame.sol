@@ -19,7 +19,7 @@ contract LowestUniqueNumberGame {
     }
 
     struct Round{
-        mapping(bytes32=>address) secretNumbers;
+        mapping(bytes32=>address) secretNumberAddresses;
         mapping(bytes32=>uint) payments;
         mapping(uint=>bool) numbersPlayed;
         uint startTime;
@@ -95,7 +95,7 @@ contract LowestUniqueNumberGame {
         }
         Round storage activeRound = roundList[SafeMath.safeSub(roundList.length, 1)];
         require(msg.value >= rules.numberPrice);
-        activeRound.secretNumbers[hash] = msg.sender;
+        activeRound.secretNumberAddresses[hash] = msg.sender;
         activeRound.payments[hash] = msg.value;
         activeRound.value += msg.value;
     }
@@ -106,10 +106,12 @@ contract LowestUniqueNumberGame {
         }
         bytes32 hash = hashNumber(number, password);
         Round storage roundToUncover = roundList[SafeMath.safeSub(roundList.length, 2)];
-        require(roundToUncover.secretNumbers[hash] == msg.sender);
+        require(roundToUncover.secretNumberAddresses[hash] == msg.sender);
         require(hash == hashNumber(number, password));
+        roundToUncover.secretNumberAddresses[hash] = 0x0; //only uncoverable once, prevents double uncover accidents
         require(checkIfPriceWasPayed(number, hash));
         payBackDifference(number, hash);
+        //this is wrong, if lowest number gets guessed twice it wont fall back to second lowest
         if(roundToUncover.numbersPlayed[number] == false) {
             roundToUncover.numbersPlayed[number] = true;
             if(roundToUncover.smallestNumber > number || roundToUncover.smallestNumber == 0) {
@@ -139,10 +141,17 @@ contract LowestUniqueNumberGame {
 
     }
 
+    function pumpUp() payable onlyActive{
+        if (!checkForActiveGamePeriod()) {
+            startNewRound();
+        }
+        roundList[SafeMath.safeSub(roundList.length, 1)].value += msg.value;
+    }
+
     function finalPayout(uint roundID, bytes32 hash) {
         require(deactivated);
         require(roundID == SafeMath.safeSub(roundList.length, 1) || roundID == SafeMath.safeSub(roundList.length, 2)); // only last two rounds, older rounds have only prizes for the winners
-        require(roundList[roundID].secretNumbers[hash] == msg.sender);
+        require(roundList[roundID].secretNumberAddresses[hash] == msg.sender);
         msg.sender.transfer(roundList[roundID].payments[hash]);
         roundList[roundID].payments[hash]=0;
     }
@@ -199,7 +208,7 @@ contract LowestUniqueNumberGame {
     }
 
     function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) constant returns (address){
-        return roundList[roundID].secretNumbers[hash];
+        return roundList[roundID].secretNumberAddresses[hash];
     }
 
     function getRoundValue(uint roundID) constant returns (uint){

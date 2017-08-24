@@ -25,6 +25,6 @@ contract TestHelpers is LowestUniqueNumberGame{
     }
 
     function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) constant returns (address){
-        return LowestUniqueNumberGame.roundList[roundID].secretNumbers[hash];
+        return LowestUniqueNumberGame.roundList[roundID].secretNumberAddresses[hash];
     }
 }

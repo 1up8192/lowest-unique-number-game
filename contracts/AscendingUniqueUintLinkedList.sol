@@ -3,6 +3,7 @@ pragma solidity ^0.4.11;
 contract AscendingUniqueUintLinkedList{
     struct Element {
         uint next;
+        uint previous;
     }
 
     uint size;

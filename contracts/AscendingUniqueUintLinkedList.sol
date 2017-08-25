@@ -15,7 +15,7 @@ contract AscendingUniqueUintLinkedList{
         return false;
     }
 
-    function insertElement(uint n) returns (bool){
+    function insertElement(uint n){
         if (n < head || head == 0){
             elements[n] = Element({previous: 0, next: head});
             head = n;
@@ -23,9 +23,14 @@ contract AscendingUniqueUintLinkedList{
             elements[n] = Element({previous: tail, next: 0});
             tail = n;
         } else {
-            //TODO, choose strategy and find previous element
+            uint previous;
+            if (size-2 < (tail-head-1) / 2){
+                previous = seekPositionSides(n);
+            } else {
+                previous = seekPositionCenter(n);
+            }
+            insertAfterPrevious(n, previous);
         }
-        return false;
     }
 
     function insertAfterPrevious(uint n, uint previous) internal {

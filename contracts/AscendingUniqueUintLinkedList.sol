@@ -13,31 +13,34 @@ library AscendingUniqueUintLinkedList{
         mapping(uint => Element) elements;
     }
 
-    function deleteElement(AUULL storage self, uint n) internal returns (bool){
-        if (self.elements[n].previous == 0 && self.elements[n].next == 0) return false; //not in the list
+    function deleteElement(AUULL storage self, uint n) internal returns (bool) { //true if new head (smallest number)
         if (n == self.head){
             uint newHead = self.elements[n].next;
             self.head = newHead;
+            return true;
         } else if (n == self.tail){
             uint newTail = self.elements[n].previous;
             self.tail = newTail;
+            return false;
         } else {
             uint previous = self.elements[n].previous;
             uint next = self.elements[n].next;
             self.elements[previous].next = next;
             self.elements[next].previous = previous;
+            return false;
         }
-        return true;
     }
 
-    function insertElement(AUULL storage self, uint n) internal returns (bool){
+    function insertElement(AUULL storage self, uint n) internal returns (bool){ //true if new head (smallest number)
         if (self.elements[n].previous != 0 || self.elements[n].next != 0) return false; //already in the list
         if (n < self.head || self.head == 0){
             self.elements[n] = Element({previous: 0, next: self.head});
             self.head = n;
+            return true;
         } else if (n > self.tail){
             self.elements[n] = Element({previous: self.tail, next: 0});
             self.tail = n;
+            return false;
         } else {
             uint previous;
             if (self.size-2 < (self.tail-self.head-1) / 2){
@@ -46,8 +49,8 @@ library AscendingUniqueUintLinkedList{
                 previous = seekPositionCenter(self, n);
             }
             insertAfterPrevious(self, n, previous);
+            return false;
         }
-        return true;
     }
 
     function insertAfterPrevious(AUULL storage self, uint n, uint previous) internal {

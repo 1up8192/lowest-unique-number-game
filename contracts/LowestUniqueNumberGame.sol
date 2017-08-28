@@ -1,5 +1,6 @@
 pragma solidity ^0.4.11;
 import "./SafeMath.sol";
+import "./AscendingUniqueUintLinkedList.sol";
 
 contract LowestUniqueNumberGame {
 
@@ -17,6 +18,8 @@ contract LowestUniqueNumberGame {
         uint periodLength;
         uint numberPrice;
     }
+
+    AscendingUniqueUintLinkedList.AUULL candidatesList;
 
     struct Round{
         mapping(bytes32=>address) secretNumberAddresses;
@@ -65,6 +68,7 @@ contract LowestUniqueNumberGame {
 
     function newRound() internal constant returns (Round){
         return Round({startTime: block.timestamp, winner: 0x0, smallestNumber: 0, prizeClaimed: false, value: 0});
+        delete candidatesList;
         if(ruleUpdateNeeded) updateRules();
     }
 
@@ -111,12 +115,19 @@ contract LowestUniqueNumberGame {
         roundToUncover.secretNumberAddresses[hash] = 0x0; //only uncoverable once, prevents double uncover accidents
         require(checkIfPriceWasPayed(number, hash));
         payBackDifference(number, hash);
-        //this is wrong, if lowest number gets guessed twice it wont fall back to second lowest
+        bool newSmallest = false;
         if(roundToUncover.numbersPlayed[number] == false) {
             roundToUncover.numbersPlayed[number] = true;
-            if(roundToUncover.smallestNumber > number || roundToUncover.smallestNumber == 0) {
-                roundToUncover.smallestNumber = number;
-                roundToUncover.winner = msg.sender;
+            newSmallest = AscendingUniqueUintLinkedList.insertElement(candidatesList, number, msg.sender);
+            if(newSmallest){
+                roundToUncover.smallestNumber = candidatesList.head;
+                roundToUncover.winner = candidatesList.elements[candidatesList.head].sender;
+            }
+        } else {
+            newSmallest = AscendingUniqueUintLinkedList.deleteElement(candidatesList, number);
+            if(newSmallest){
+                roundToUncover.smallestNumber = candidatesList.head;
+                roundToUncover.winner = candidatesList.elements[candidatesList.head].sender;
             }
         }
     }

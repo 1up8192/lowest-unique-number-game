@@ -11,11 +11,25 @@ contract AscendingUniqueUintLinkedList{
     uint tail;
     mapping(uint => Element) elements;
 
-    function deleteElement() returns (bool){
-        return false;
+    function deleteElement(uint n) internal returns (bool){
+        if (elements[n].previous == 0 && elements[n].next == 0) return false; //not in the list
+        if (n == head){
+            uint newHead = elements[n].next;
+            head = newHead;
+        } else if (n == tail){
+            uint newTail = elements[n].previous;
+            tail = newTail;
+        } else {
+            uint previous = elements[n].previous;
+            uint next = elements[n].next;
+            elements[previous].next = next;
+            elements[next].previous = previous;
+        }
+        return true;
     }
 
-    function insertElement(uint n){
+    function insertElement(uint n) internal returns (bool){
+        if (elements[n].previous != 0 || elements[n].next != 0) return false; //already in the list
         if (n < head || head == 0){
             elements[n] = Element({previous: 0, next: head});
             head = n;
@@ -31,6 +45,7 @@ contract AscendingUniqueUintLinkedList{
             }
             insertAfterPrevious(n, previous);
         }
+        return true;
     }
 
     function insertAfterPrevious(uint n, uint previous) internal {
@@ -41,7 +56,7 @@ contract AscendingUniqueUintLinkedList{
         elements[next].previous = n;
     }
 
-    function seekPositionSides(uint n) returns (uint) {
+    function seekPositionSides(uint n) constant returns (uint) {
         uint previous;
         uint position;
         if (n < (head+tail)/2){ //forward search
@@ -56,7 +71,7 @@ contract AscendingUniqueUintLinkedList{
         return previous;
     }
 
-    function seekPositionCenter(uint n) returns (uint) {
+    function seekPositionCenter(uint n) constant returns (uint) {
         bool found = false;
         uint distance = 1;
         uint previous;
@@ -72,5 +87,13 @@ contract AscendingUniqueUintLinkedList{
             distance += 1;
         } while(!found);
         return previous;
+    }
+
+    function check(uint n) constant returns (bool){
+        if (elements[n].previous != 0 || elements[n].next != 0){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

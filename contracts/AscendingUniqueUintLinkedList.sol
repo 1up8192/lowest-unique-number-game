@@ -1,87 +1,89 @@
 pragma solidity ^0.4.11;
 
-contract AscendingUniqueUintLinkedList{
+library AscendingUniqueUintLinkedList{
     struct Element {
         uint previous;
         uint next;
     }
 
-    uint size;
-    uint head;
-    uint tail;
-    mapping(uint => Element) elements;
+    struct AUULL{
+        uint size;
+        uint head;
+        uint tail;
+        mapping(uint => Element) elements;
+    }
 
-    function deleteElement(uint n) internal returns (bool){
-        if (elements[n].previous == 0 && elements[n].next == 0) return false; //not in the list
-        if (n == head){
-            uint newHead = elements[n].next;
-            head = newHead;
-        } else if (n == tail){
-            uint newTail = elements[n].previous;
-            tail = newTail;
+    function deleteElement(AUULL storage self, uint n) internal returns (bool){
+        if (self.elements[n].previous == 0 && self.elements[n].next == 0) return false; //not in the list
+        if (n == self.head){
+            uint newHead = self.elements[n].next;
+            self.head = newHead;
+        } else if (n == self.tail){
+            uint newTail = self.elements[n].previous;
+            self.tail = newTail;
         } else {
-            uint previous = elements[n].previous;
-            uint next = elements[n].next;
-            elements[previous].next = next;
-            elements[next].previous = previous;
+            uint previous = self.elements[n].previous;
+            uint next = self.elements[n].next;
+            self.elements[previous].next = next;
+            self.elements[next].previous = previous;
         }
         return true;
     }
 
-    function insertElement(uint n) internal returns (bool){
-        if (elements[n].previous != 0 || elements[n].next != 0) return false; //already in the list
-        if (n < head || head == 0){
-            elements[n] = Element({previous: 0, next: head});
-            head = n;
-        } else if (n > tail){
-            elements[n] = Element({previous: tail, next: 0});
-            tail = n;
+    function insertElement(AUULL storage self, uint n) internal returns (bool){
+        if (self.elements[n].previous != 0 || self.elements[n].next != 0) return false; //already in the list
+        if (n < self.head || self.head == 0){
+            self.elements[n] = Element({previous: 0, next: self.head});
+            self.head = n;
+        } else if (n > self.tail){
+            self.elements[n] = Element({previous: self.tail, next: 0});
+            self.tail = n;
         } else {
             uint previous;
-            if (size-2 < (tail-head-1) / 2){
-                previous = seekPositionSides(n);
+            if (self.size-2 < (self.tail-self.head-1) / 2){
+                previous = seekPositionSides(self, n);
             } else {
-                previous = seekPositionCenter(n);
+                previous = seekPositionCenter(self, n);
             }
-            insertAfterPrevious(n, previous);
+            insertAfterPrevious(self, n, previous);
         }
         return true;
     }
 
-    function insertAfterPrevious(uint n, uint previous) internal {
-        uint next = elements[previous].next;
-        elements[n].previous = previous;
-        elements[n].next = next;
-        elements[previous].next = n;
-        elements[next].previous = n;
+    function insertAfterPrevious(AUULL storage self, uint n, uint previous) internal {
+        uint next = self.elements[previous].next;
+        self.elements[n].previous = previous;
+        self.elements[n].next = next;
+        self.elements[previous].next = n;
+        self.elements[next].previous = n;
     }
 
-    function seekPositionSides(uint n) constant returns (uint) {
+    function seekPositionSides(AUULL storage self, uint n) constant returns (uint) {
         uint previous;
         uint position;
-        if (n < (head+tail)/2){ //forward search
-            for(position = head; position < n; position = elements[position].next){
-                previous = elements[previous].previous;
+        if (n < (self.head+self.tail)/2){ //forward search
+            for(position = self.head; position < n; position = self.elements[position].next){
+                previous = self.elements[previous].previous;
             }
         } else { //backward search
-            for(position = tail; position > n; position = elements[position].previous){
+            for(position = self.tail; position > n; position = self.elements[position].previous){
                 previous = position;
             }
         }
         return previous;
     }
 
-    function seekPositionCenter(uint n) constant returns (uint) {
+    function seekPositionCenter(AUULL storage self, uint n) constant returns (uint) {
         bool found = false;
         uint distance = 1;
         uint previous;
         do{
-            if(elements[n-distance].next != 0){
+            if(self.elements[n-distance].next != 0){
                 previous = n-distance;
                 found = true;
             }
-            if(elements[n+distance].previous != 0){
-                previous = elements[n+distance].previous;
+            if(self.elements[n+distance].previous != 0){
+                previous = self.elements[n+distance].previous;
                 found = true;
             }
             distance += 1;
@@ -89,8 +91,8 @@ contract AscendingUniqueUintLinkedList{
         return previous;
     }
 
-    function check(uint n) constant returns (bool){
-        if (elements[n].previous != 0 || elements[n].next != 0){
+    function check(AUULL storage self, uint n) constant returns (bool){
+        if (self.elements[n].previous != 0 || self.elements[n].next != 0){
             return true;
         } else {
             return false;

@@ -4,6 +4,7 @@ library AscendingUniqueUintLinkedList{
     struct Element {
         uint previous;
         uint next;
+        address sender;
     }
 
     struct AUULL{
@@ -31,14 +32,14 @@ library AscendingUniqueUintLinkedList{
         }
     }
 
-    function insertElement(AUULL storage self, uint n) internal returns (bool){ //true if new head (smallest number)
+    function insertElement(AUULL storage self, uint n, address sender) internal returns (bool){ //true if new head (smallest number)
         if (self.elements[n].previous != 0 || self.elements[n].next != 0) return false; //already in the list
         if (n < self.head || self.head == 0){
-            self.elements[n] = Element({previous: 0, next: self.head});
+            self.elements[n] = Element({previous: 0, next: self.head, sender: sender});
             self.head = n;
             return true;
         } else if (n > self.tail){
-            self.elements[n] = Element({previous: self.tail, next: 0});
+            self.elements[n] = Element({previous: self.tail, next: 0, sender: sender});
             self.tail = n;
             return false;
         } else {

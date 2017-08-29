@@ -25,10 +25,10 @@ contract( "simple game prize test", function(accounts) {
       return TestHelpers.deployed();
     }).then(function(helperInstance){
       testHelpers = helperInstance;
-      return lung.hashNumber.call(number1, "password");
+      return lung.hashNumber.call(number1, "password", accounts[0]);
     }).then(function(_hash){
       hash1 = _hash;
-      return lung.hashNumber.call(number2, "password");
+      return lung.hashNumber.call(number2, "password", accounts[1]);
     }).then(function(_hash){
       hash2 = _hash;
       return lung.getNumberPrice.call();

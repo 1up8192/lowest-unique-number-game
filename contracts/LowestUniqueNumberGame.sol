@@ -1,6 +1,7 @@
 pragma solidity ^0.4.11;
 import "./SafeMath.sol";
 import "./AscendingUniqueUintLinkedList.sol";
+import "./MinHeap.sol";
 
 contract LowestUniqueNumberGame {
 
@@ -20,11 +21,12 @@ contract LowestUniqueNumberGame {
     }
 
     AscendingUniqueUintLinkedList.AUULL candidatesList;
+    MinHeap.Heap candidatesHeap;
 
     struct Round{
         mapping(bytes32=>address) secretNumberAddresses;
         mapping(bytes32=>uint) payments;
-        mapping(uint=>bool) numbersPlayed;
+        mapping(uint=>address[]) numbersUncovered;
         uint startTime;
         address winner;
         uint smallestNumber;
@@ -114,21 +116,22 @@ contract LowestUniqueNumberGame {
         roundToUncover.secretNumberAddresses[hash] = 0x0; //only uncoverable once, prevents double uncover accidents
         require(checkIfPriceWasPayed(number, hash));
         payBackDifference(number, hash);
-        bool newSmallest = false;
-        if(roundToUncover.numbersPlayed[number] == false) {
-            roundToUncover.numbersPlayed[number] = true;
-            newSmallest = AscendingUniqueUintLinkedList.insertElement(candidatesList, number, msg.sender);
-            if(newSmallest){
-                roundToUncover.smallestNumber = candidatesList.head;
-                roundToUncover.winner = candidatesList.elements[candidatesList.head].sender;
+        if(roundToUncover.numbersUncovered[number].length == 0) {
+            if (number < roundToUncover.smallestNumber){
+                roundToUncover.smallestNumber = number;
+                roundToUncover.winner = msg.sender;
             }
+            MinHeap.insert(candidatesHeap, number);
         } else {
-            newSmallest = AscendingUniqueUintLinkedList.deleteElement(candidatesList, number);
-            if(newSmallest){
-                roundToUncover.smallestNumber = candidatesList.head;
-                roundToUncover.winner = candidatesList.elements[candidatesList.head].sender;
+            if(roundToUncover.numbersUncovered[number].length == 1){
+                MinHeap.removeNumber(candidatesHeap, number);
+                if(number == roundToUncover.smallestNumber){
+                    roundToUncover.smallestNumber = MinHeap.min(candidatesHeap);
+                    roundToUncover.winner = roundToUncover.numbersUncovered[MinHeap.min(candidatesHeap)][0];
+                }
             }
         }
+        roundToUncover.numbersUncovered[number].push(msg.sender);
     }
 
     function checkIfClaimable(uint roundID) constant returns (bool){

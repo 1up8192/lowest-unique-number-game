@@ -1,3 +1,4 @@
+pragma solidity ^0.4.11;
 import "./MinHeap.sol";
 
 contract MinHeapTestHelper{

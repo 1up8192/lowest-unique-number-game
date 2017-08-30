@@ -24,15 +24,16 @@ library MinHeap{
     }
 
     function insert(Heap storage self, uint n) {
-        self.heap[self.size] = n;
-        bubbleUp(self);
+        self.heap.push(n);
         self.size += 1;
+        bubbleUp(self);
     }
 
     function remove(Heap storage self, uint i){
         self.heap[i] = self.heap[self.size - 1];
-        sinkDown(self, i);
+        delete self.heap[self.size - 1];
         self.size -= 1;
+        sinkDown(self, i);
     }
 
     function removeNumber(Heap storage self, uint n){

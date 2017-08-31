@@ -1,6 +1,6 @@
 var MinHeapTestHelper = artifacts.require("MinHeapTestHelper");
 
-contract( "Remove number test", function(accounts) {
+contract( "MinHeapTestHelper", function(accounts) {
   it("should remove one number", function(){
     var mhth;
     var number1 = 1;

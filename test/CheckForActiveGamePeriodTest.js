@@ -1,6 +1,6 @@
 var TestHelpers = artifacts.require("TestHelpers");
 
-contract( "check for active game period test", function(accounts) {
+contract( "TestHelpers", function(accounts) {
   it("should be active after a guess is recieved", function(){
     var th;
     var number = 1;

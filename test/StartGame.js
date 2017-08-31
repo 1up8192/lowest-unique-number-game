@@ -1,6 +1,6 @@
 var TestHelpers = artifacts.require("TestHelpers");
 
-contract( "start game test", function(accounts) {
+contract( "TestHelpers", function(accounts) {
   it("should start a new game", function(){
     var th;
     var number = 1;

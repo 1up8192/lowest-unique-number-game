@@ -1,7 +1,7 @@
 var timeTravel = require('../timetravel/TimeTravel.js');
 var TestHelpers = artifacts.require("TestHelpers");
 
-contract( "check for active game period test after timeout", function(accounts) {
+contract( "TestHelpers", function(accounts) {
   it("should be inactive after timeout", function(){
     var th;
     var number = 1;

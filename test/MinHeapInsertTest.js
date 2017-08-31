@@ -1,6 +1,6 @@
 var MinHeapTestHelper = artifacts.require("MinHeapTestHelper");
 
-contract( "Insert number test", function(accounts) {
+contract( "MinHeapTestHelper", function(accounts) {
   it("should insert one number to the root (min)", function(){
     var mhth;
     var number = 1;

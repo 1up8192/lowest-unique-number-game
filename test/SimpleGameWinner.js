@@ -1,7 +1,7 @@
 var timeTravel = require('../timetravel/TimeTravel.js');
 var TestHelpers = artifacts.require("TestHelpers");
 
-contract( "simple game winner test", function(accounts) {
+contract( "TestHelpers", function(accounts) {
   it("smaller guess should win", function(){
     var th;
     var number1 = 1;

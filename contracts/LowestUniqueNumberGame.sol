@@ -1,6 +1,5 @@
 pragma solidity ^0.4.11;
 import "./SafeMath.sol";
-import "./AscendingUniqueUintLinkedList.sol";
 import "./MinHeap.sol";
 
 contract LowestUniqueNumberGame {
@@ -20,7 +19,6 @@ contract LowestUniqueNumberGame {
         uint numberPrice;
     }
 
-    AscendingUniqueUintLinkedList.AUULL candidatesList;
     MinHeap.Heap candidatesHeap;
 
     struct Round{
@@ -70,7 +68,7 @@ contract LowestUniqueNumberGame {
 
     function newRound() internal constant returns (Round){
         return Round({startTime: block.timestamp, winner: 0x0, smallestNumber: 0, prizeClaimed: false, value: 0});
-        delete candidatesList;
+        delete candidatesHeap;
         if(ruleUpdateNeeded) updateRules();
     }
 
@@ -117,7 +115,8 @@ contract LowestUniqueNumberGame {
         require(checkIfPriceWasPayed(number, hash));
         payBackDifference(number, hash);
         if(roundToUncover.numbersUncovered[number].length == 0) {
-            if (number < roundToUncover.smallestNumber){
+            roundToUncover.numbersUncovered[number].push(msg.sender);
+            if (number < roundToUncover.smallestNumber || roundToUncover.smallestNumber == 0){
                 roundToUncover.smallestNumber = number;
                 roundToUncover.winner = msg.sender;
             }
@@ -126,12 +125,17 @@ contract LowestUniqueNumberGame {
             if(roundToUncover.numbersUncovered[number].length == 1){
                 MinHeap.removeNumber(candidatesHeap, number);
                 if(number == roundToUncover.smallestNumber){
-                    roundToUncover.smallestNumber = MinHeap.min(candidatesHeap);
-                    roundToUncover.winner = roundToUncover.numbersUncovered[MinHeap.min(candidatesHeap)][0];
+                    if(candidatesHeap.heap.length > 0){
+                        roundToUncover.smallestNumber = MinHeap.min(candidatesHeap);
+                        roundToUncover.winner = roundToUncover.numbersUncovered[MinHeap.min(candidatesHeap)][0];
+                    } else {
+                        delete roundToUncover.smallestNumber;
+                        delete roundToUncover.winner;
+                    }
                 }
             }
+            roundToUncover.numbersUncovered[number].push(msg.sender);
         }
-        roundToUncover.numbersUncovered[number].push(msg.sender);
     }
 
     function checkIfClaimable(uint roundID) constant returns (bool){

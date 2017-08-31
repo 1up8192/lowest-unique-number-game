@@ -1,7 +1,7 @@
 var TestHelpers = artifacts.require("TestHelpers");
 
-contract( "start game test", function(accounts) {
-  it("should start a new game", function(){
+contract( "check for active game period test", function(accounts) {
+  it("should be active after a guess is recieved", function(){
     var th;
     var number = 1;
     var numberPrice;
@@ -18,16 +18,9 @@ contract( "start game test", function(accounts) {
       numberPrice = _numberPrice.toNumber();
       return th.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number});
     }).then(function(){
-      return th.getNumberOfRounds.call();
-      /*assert.equal(1, 1, "okay");*/
-    }).then(function(_numberOfRounds){
-      numberOfRounds = _numberOfRounds.toNumber();
-      return th.getSenderByRoundIDAndHash.call(0, hash);
-    }).then(function(_address){
-      address = _address;
-
-      assert.equal(numberOfRounds, 1, "numberOfRounds wasnt 1");
-      assert.equal(address, accounts[0], "guess with given address wasnt found");
+      return th.checkForActiveGamePeriod.call();
+    }).then(function(result){
+      assert.equal(result, true, "should be true after a guess");
     });
   });
 });

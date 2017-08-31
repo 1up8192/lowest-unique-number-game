@@ -203,33 +203,4 @@ contract LowestUniqueNumberGame {
         ruleUpdateNeeded = false;
     }
 
-    function getWinner(uint roundID) constant returns (address){
-        return roundList[roundID].winner;
-    }
-
-    function getEdgePercent() constant returns (uint) {
-        LowestUniqueNumberGame.checkForActiveGamePeriod();
-        return rules.edgePercent;
-    }
-
-    function getPeriodLength() constant returns (uint) {
-        return rules.periodLength;
-    }
-
-    function getNumberPrice() constant returns (uint) {
-        return rules.numberPrice;
-    }
-
-    function getNumberOfRounds() constant returns (uint) {
-        return roundList.length;
-    }
-
-    function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) constant returns (address){
-        return roundList[roundID].secretNumberAddresses[hash];
-    }
-
-    function getRoundValue(uint roundID) constant returns (uint){
-        return roundList[roundID].value;
-    }
-
 }

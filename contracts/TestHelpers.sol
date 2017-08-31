@@ -31,4 +31,8 @@ contract TestHelpers is LowestUniqueNumberGame{
     function getRoundValue(uint roundID) constant returns (uint){
         return LowestUniqueNumberGame.roundList[roundID].value;
     }
+
+    function skipRound(){
+        LowestUniqueNumberGame.newRound();
+    }
 }

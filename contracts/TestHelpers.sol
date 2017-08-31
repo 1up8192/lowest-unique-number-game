@@ -33,6 +33,6 @@ contract TestHelpers is LowestUniqueNumberGame{
     }
 
     function skipRound(){
-        LowestUniqueNumberGame.newRound();
+        LowestUniqueNumberGame.startNewRound();
     }
 }

@@ -26,13 +26,13 @@ contract( "TestHelpers", function(accounts) {
     }).then(function(_numberPrice){
       return th.submitSecretNumber(hash2, {from: accounts[1], value: numberPrice * number2});
     }).then(function(){
-      return timeTravel.secondsForward(60*60*24); //one day later...
+      return th.skipRound(); //one day later...
     }).then(function(){
       return th.uncoverNumber(1, "password", {from: accounts[0]});
     }).then(function(){
       return th.uncoverNumber(2, "password", {from: accounts[1]});
     }).then(function(){
-      return timeTravel.secondsForward(60*60*24); //one day later...
+      return th.skipRound(); //one day later...
     }).then(function(){
       return th.getWinner.call(0);
     }).then(function(winnerAddress){

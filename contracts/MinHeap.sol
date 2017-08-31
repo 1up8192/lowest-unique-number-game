@@ -1,39 +1,43 @@
 pragma solidity ^0.4.11;
 
+import "./SafeMath.sol";
+
 library MinHeap{
     struct Heap{
-        uint size;
         uint[] heap;
     }
 
-    function parent(uint i) constant returns (uint){
+    function parent(uint i) internal constant returns (uint){
         if (i == 0) return i;
-        return (i-1)/2;
+        return (SafeMath.safeSub(i, 1))/2;
     }
 
-    function leftChild(uint i) constant returns (uint){
+    function leftChild(uint i) internal constant returns (uint){
         return i*2+1;
     }
 
-    function rightChild(uint i) constant returns (uint){
+    function rightChild(uint i) internal constant returns (uint){
         return i*2+2;
     }
 
     function min(Heap storage self) constant returns (uint){
+        if(self.heap.length == 0) revert();
         return self.heap[0];
     }
 
     function insert(Heap storage self, uint n) {
         self.heap.push(n);
-        self.size += 1;
         bubbleUp(self);
     }
 
-    function remove(Heap storage self, uint i){
-        self.heap[i] = self.heap[self.size - 1];
-        delete self.heap[self.size - 1];
-        self.size -= 1;
-        sinkDown(self, i);
+    function remove(Heap storage self, uint i) internal {
+        self.heap[i] = self.heap[SafeMath.safeSub(self.heap.length, 1)];
+        self.heap.length = SafeMath.safeSub(self.heap.length, 1);
+        if(self.heap.length > 0){
+            sinkDown(self, i);
+        } else {
+            delete self.heap;
+        }
     }
 
     function removeNumber(Heap storage self, uint n){
@@ -41,16 +45,16 @@ library MinHeap{
         remove(self, i);
     }
 
-    function findIndex(Heap storage self, uint n) constant returns (uint){
+    function findIndex(Heap storage self, uint n) internal constant returns (uint){
         uint i = 0;
-        while (i <= self.size - 1){
+        while (i <= SafeMath.safeSub(self.heap.length, 1)){
             if(self.heap[i] == n) return i;
             i += 1;
         }
         revert();
     }
 
-    function sinkDown(Heap storage self, uint i){
+    function sinkDown(Heap storage self, uint i) internal {
         while (smallestOf3(self, i) != i){
             uint smallest = smallestOf3(self, i);
             swapWithParent(self, smallest);
@@ -58,24 +62,23 @@ library MinHeap{
         }
     }
 
-    function bubbleUp(Heap storage self){
-        uint i = self.size - 1;
+    function bubbleUp(Heap storage self) internal {
+        uint i = SafeMath.safeSub(self.heap.length, 1);
         while (self.heap[i] < self.heap[parent(i)]){
             swapWithParent(self, i);
             i = parent(i);
         }
     }
 
-    function swapWithParent(Heap storage self, uint i){
+    function swapWithParent(Heap storage self, uint i) internal {
         uint temp = self.heap[i];
         self.heap[i] = self.heap[parent(i)];
         self.heap[parent(i)] = temp;
     }
 
     function smallestOf3(Heap storage self, uint i) constant returns (uint){
-        if ((self.heap[i] < self.heap[leftChild(i)] || self.heap[leftChild(i)] == 0 ) && (self.heap[i] < self.heap[rightChild(i)] || self.heap[rightChild(i)] == 0 )) return i;
-        if ( (self.heap[leftChild(i)] < self.heap[rightChild(i)]) && (self.heap[leftChild(i)] != 0)) return self.heap[leftChild(i)];
+        if ( (leftChild(i) >= self.heap.length || self.heap[i] < self.heap[leftChild(i)]) && (rightChild(i) >= self.heap.length || self.heap[i] < self.heap[rightChild(i)]) ) return i;
+        if ( (leftChild(i) < self.heap.length) && (self.heap[leftChild(i)] < self.heap[rightChild(i)]) ) return self.heap[leftChild(i)];
         return self.heap[rightChild(i)];
     }
-
 }

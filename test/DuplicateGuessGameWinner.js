@@ -39,7 +39,7 @@ contract( "TestHelpers", function(accounts) {
     }).then(function(){
       return th.submitSecretNumber(hash3, {from: accounts[3], value: numberPrice * number3});
     }).then(function(){
-      return timeTravel.secondsForward(60*60*24); //one day later...
+      return th.skipRound(); //one day later...
     }).then(function(){
       return th.uncoverNumber(1, "password", {from: accounts[0]});
     }).then(function(){
@@ -49,7 +49,7 @@ contract( "TestHelpers", function(accounts) {
     }).then(function(){
       return th.uncoverNumber(3, "password", {from: accounts[3]});
     }).then(function(){
-      return timeTravel.secondsForward(60*60*24); //one day later...
+      return th.skipRound(); //one day later...
     }).then(function(){
       return th.getWinner.call(0);
     }).then(function(winnerAddress){

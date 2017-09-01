@@ -33,6 +33,7 @@ contract LowestUniqueNumberGame {
     }
 
     event prizeClaimed(uint indexed prize);
+    event payback(uint indexed prize);
 
     function LowestUniqueNumberGame() {
         owner = msg.sender;
@@ -85,6 +86,7 @@ contract LowestUniqueNumberGame {
         require(payment >= cost);
         uint difference = payment - cost;
         msg.sender.transfer(difference);
+        payback(difference);
         roundToPayBack.payments[hash] = cost;
         roundToPayBack.value -= difference;
     }

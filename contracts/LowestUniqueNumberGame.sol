@@ -8,7 +8,7 @@ contract LowestUniqueNumberGame {
     uint stash;
 
     bool deactivated = false;
-    Rules rules = Rules({edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether});
+    Rules rules = Rules({edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 1 days, expirationEdgePercent: 50});
     Round[] public roundList;
     Rules newRules = rules;
     bool ruleUpdateNeeded = false;
@@ -17,6 +17,9 @@ contract LowestUniqueNumberGame {
         uint edgePercent;
         uint periodLength;
         uint numberPrice;
+        uint prizeExpiration;
+        uint expirationEdgePercent;
+
     }
 
     MinHeap.Heap candidatesHeap;
@@ -62,6 +65,13 @@ contract LowestUniqueNumberGame {
         return result;
     }
 
+    function prizeExpired(uint roundId) constant returns (bool){
+        if( block.timestamp > roundList[roundId].startTime + 2 days + rules.prizeExpiration){
+            return true;
+        }
+        return false;
+    }
+
     function hashNumber(uint number, string password, address sender) constant returns (bytes32){
         require(number != 0);
         return sha3(number, password, sender);
@@ -93,6 +103,7 @@ contract LowestUniqueNumberGame {
 
     function startNewRound() internal{
         roundList.push(newRound());
+        if(ruleUpdateNeeded) updateRules();
     }
 
     function submitSecretNumber(bytes32 hash) payable onlyActive{
@@ -150,6 +161,7 @@ contract LowestUniqueNumberGame {
         require(checkIfClaimable(roundID));
         require(!roundList[roundID].prizeClaimed);
         require(msg.sender == roundList[roundID].winner);
+        require(!prizeExpired(roundID));
         uint fullValue = roundList[roundID].value;
         uint edge = fullValue / 100 * rules.edgePercent;
         uint prize = fullValue - edge;
@@ -165,6 +177,12 @@ contract LowestUniqueNumberGame {
             startNewRound();
         }
         roundList[SafeMath.safeSub(roundList.length, 1)].value += msg.value;
+    }
+
+    function recyclePrize(uint roundID){
+        require(prizeExpired(roundID));
+        roundList[SafeMath.safeSub(roundList.length, 1)].value += roundList[roundID].value / 2;
+        stash += roundList[roundID].value / 2;
     }
 
     function finalPayout(uint roundID, bytes32 hash) {
@@ -197,6 +215,17 @@ contract LowestUniqueNumberGame {
 
     function setNumberPrice(uint newNumberPrice) onlyOwner {
         newRules.numberPrice = newNumberPrice;
+        ruleUpdateNeeded = true;
+    }
+
+    function setPrizeExpiration(uint numberOfDays) onlyOwner{
+        require(numberOfDays > 1);
+        newRules.prizeExpiration = numberOfDays * 1 days;
+        ruleUpdateNeeded = true;
+    }
+
+    function expirationEdgePercent(uint newExpirationEdgePercent) onlyOwner{
+        newRules.expirationEdgePercent = newExpirationEdgePercent;
         ruleUpdateNeeded = true;
     }
 

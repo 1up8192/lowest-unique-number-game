@@ -1,4 +1,4 @@
-var timeTravel = require('../timetravel/TimeTravel.js');
+var timeTravel = require('../testHelperModules/TimeTravel.js');
 var TestHelpers = artifacts.require("TestHelpers");
 
 contract( "TestHelpers", function(accounts) {

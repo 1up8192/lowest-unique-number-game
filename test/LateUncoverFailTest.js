@@ -1,8 +1,9 @@
+var expectThrow = require('../testHelperModules/ExpectThrow.js');
 var timeTravel = require('../testHelperModules/TimeTravel.js');
 var TestHelpers = artifacts.require("TestHelpers");
 
 contract( "TestHelpers", function(accounts) {
-  it("should be inactive after timeout", function(){
+  it("shouldn't uncover, beacause it's too late", function(){
     var th;
     var number = 1;
     var numberPrice;
@@ -11,7 +12,7 @@ contract( "TestHelpers", function(accounts) {
     var address;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
-      return th.hashNumber.call(1, "password", accounts[0]);
+      return th.hashNumber.call(number, "password", accounts[0]);
     }).then(function(_hash){
       hash = _hash;
       return th.getNumberPrice.call();
@@ -19,11 +20,13 @@ contract( "TestHelpers", function(accounts) {
       numberPrice = _numberPrice.toNumber();
       return th.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number});
     }).then(function(){
-      return timeTravel.secondsForward(60*60*24 + 60); //a day and a little later
+      return th.skipRound(); //one day later...
+      return th.skipRound(); //one day later...
+      return th.skipRound(); //one day later...
     }).then(function(){
-      return th.checkForActiveGamePeriod.call();
+      return expectThrow.getThrowType( th.uncoverNumber(number, "password", {from: accounts[0]}) );
     }).then(function(result){
-      assert.equal(result, true, "should be false after timeout");
+      assert.equal(result, "invalidOpcode", "Expected invalidOpcode, got '" + result + "' instead")
     });
   });
 });

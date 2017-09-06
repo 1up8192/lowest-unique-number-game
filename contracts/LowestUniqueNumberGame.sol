@@ -122,6 +122,7 @@ contract LowestUniqueNumberGame {
             startNewRound();
         }
         bytes32 hash = hashNumber(number, password, msg.sender);
+        require(number != 0);
         Round storage roundToUncover = roundList[SafeMath.safeSub(roundList.length, 2)];
         require(roundToUncover.secretNumberAddresses[hash] == msg.sender);
         roundToUncover.secretNumberAddresses[hash] = 0x0; //only uncoverable once, prevents double uncover accidents

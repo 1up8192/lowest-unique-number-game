@@ -3,7 +3,7 @@ var timeTravel = require('../testHelperModules/TimeTravel.js');
 var TestHelpers = artifacts.require("TestHelpers");
 
 contract( "TestHelpers", function(accounts) {
-  it("shouldn't uncover, beacause it's too late", function(){
+  it("shouldn't uncover, beacause tx from wrong addres", function(){
     var th;
     var number = 1;
     var numberPrice;
@@ -22,9 +22,7 @@ contract( "TestHelpers", function(accounts) {
     }).then(function(){
       return th.skipRound(); //one day later...
     }).then(function(){
-      return th.skipRound(); //one day later...
-    }).then(function(){
-      return expectThrow.getThrowType( th.uncoverNumber(number, "password", {from: accounts[0]}) );
+      return expectThrow.getThrowType( th.uncoverNumber(number, "password", {from: accounts[1]}) );
     }).then(function(result){
       assert.equal(result, "invalidOpcode", "Expected invalidOpcode, got '" + result + "' instead")
     });

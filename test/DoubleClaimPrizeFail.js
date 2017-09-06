@@ -1,3 +1,4 @@
+var expectThrow = require('../testHelperModules/ExpectThrow.js');
 var timeTravel = require('../testHelperModules/TimeTravel.js');
 var TestHelpers = artifacts.require("TestHelpers");
 
@@ -40,6 +41,10 @@ contract( "TestHelpers", function(accounts) {
       return th.claimPrize(0, {from: accounts[0]});
     }).then(function(result){
       actualPrize = result.logs[0].args.prize.toNumber()
+    }).then(function(){
+      return expectThrow.getThrowType( th.claimPrize(0, {from: accounts[0]})); //second claim
+    }).then(function(result){
+      assert.equal(result, "invalidOpcode", "Expected invalidOpcode, got '" + result + "' instead")
       assert.equal(actualPrize, prizeExpected, "prize should be as calculated")
     });
   });

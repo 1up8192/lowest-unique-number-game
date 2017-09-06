@@ -1,16 +1,17 @@
+var expectThrow = require('../testHelperModules/ExpectThrow.js');
 var timeTravel = require('../testHelperModules/TimeTravel.js');
 var TestHelpers = artifacts.require("TestHelpers");
 
 contract( "TestHelpers", function(accounts) {
-  it("winner should recieve correct prize", function(){
+  it("smaller guess should win, fake claim should fail", function(){
     var th;
     var number1 = 1;
     var number2 = 2;
     var numberPrice;
     var hash1;
     var hash2;
-    var prizeExpected;
-    var actualPrize;
+    var numberOfRounds;
+    var winnerAddress;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
       return th.hashNumber.call(number1, "password", accounts[0]);
@@ -34,13 +35,14 @@ contract( "TestHelpers", function(accounts) {
     }).then(function(){
       return th.skipRound(); //one day later...
     }).then(function(){
-      return th.getEdgePercent.call();
-    }).then(function(edgePercent){
-      prizeExpected = (number1 + number2) * numberPrice / 100 * (100 - edgePercent);
-      return th.claimPrize(0, {from: accounts[0]});
+      return th.getWinner.call(0);
+    }).then(function(address){
+      winnerAddress = address;
+    }).then(function(){
+      return expectThrow.getThrowType( th.claimPrize(0, {from: accounts[1]})); //fake claim
     }).then(function(result){
-      actualPrize = result.logs[0].args.prize.toNumber()
-      assert.equal(actualPrize, prizeExpected, "prize should be as calculated")
+      assert.equal(result, "invalidOpcode", "Expected invalidOpcode, got '" + result + "' instead")
+      assert.equal(winnerAddress, accounts[0], "first player (acc0) should be the winner");
     });
   });
 });

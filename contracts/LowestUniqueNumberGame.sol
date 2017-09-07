@@ -6,14 +6,15 @@ contract LowestUniqueNumberGame {
 
     address owner;
     uint stash;
-
     bool deactivated = false;
-    Rules rules = Rules({edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 1 days, expirationEdgePercent: 50});
+    uint deactivationTime;
+    Rules rules = Rules({prizeCarryPercent: 10, edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 1 days, expirationEdgePercent: 50});
     Round[] public roundList;
     Rules newRules = rules;
     bool ruleUpdateNeeded = false;
 
     struct Rules{
+        uint prizeCarryPercent;
         uint edgePercent;
         uint periodLength;
         uint numberPrice;
@@ -103,6 +104,8 @@ contract LowestUniqueNumberGame {
 
     function startNewRound() internal{
         roundList.push(newRound());
+        noWinnerValueCarry();
+        taxes();
         if(ruleUpdateNeeded) updateRules();
     }
 
@@ -163,12 +166,8 @@ contract LowestUniqueNumberGame {
         require(!roundList[roundID].prizeClaimed);
         require(msg.sender == roundList[roundID].winner);
         require(!prizeExpired(roundID));
-        uint fullValue = roundList[roundID].value;
-        uint edge = fullValue / 100 * rules.edgePercent;
-        uint prize = fullValue - edge;
-        stash += edge;
-        msg.sender.transfer(prize);
-        prizeClaimed(prize);
+        msg.sender.transfer(roundList[roundID].value);
+        prizeClaimed(roundList[roundID].value);
         roundList[roundID].prizeClaimed = true;
 
     }
@@ -184,6 +183,27 @@ contract LowestUniqueNumberGame {
         require(prizeExpired(roundID));
         roundList[SafeMath.safeSub(roundList.length, 1)].value += roundList[roundID].value / 2;
         stash += roundList[roundID].value / 2;
+    }
+
+    function noWinnerValueCarry() internal {
+        if (roundList.length == 1) return;
+        if (roundList[SafeMath.safeSub(roundList.length, 2)].winner == 0x0){
+            uint value = roundList[SafeMath.safeSub(roundList.length, 2)].value;
+            roundList[SafeMath.safeSub(roundList.length, 2)].value = 0;
+            roundList[SafeMath.safeSub(roundList.length, 2)].value = value;
+        }
+    }
+
+    function taxes() internal {
+        if (roundList.length == 1) return;
+        if (roundList[SafeMath.safeSub(roundList.length, 2)].winner != 0x0){
+            uint lastRoundValue = roundList[SafeMath.safeSub(roundList.length, 2)].value;
+            uint edge = lastRoundValue / 100 * rules.edgePercent;
+            uint carry = lastRoundValue / 100 * rules.prizeCarryPercent;
+            roundList[SafeMath.safeSub(roundList.length, 2)].value = SafeMath.safeSub(lastRoundValue, (edge + carry));
+            roundList[SafeMath.safeSub(roundList.length, 1)].value += carry;
+            stash += edge;
+        }
     }
 
     function finalPayout(uint roundID, bytes32 hash) {
@@ -202,6 +222,21 @@ contract LowestUniqueNumberGame {
             actualAmount = amount;
         }
         owner.transfer(actualAmount);
+    }
+
+    function deactivate() onlyOwner{
+        deactivated = true;
+        deactivationTime = block.timestamp;
+    }
+
+    function kill() onlyOwner{
+        require(deactivationTime + 10 days < block.timestamp);
+        selfdestruct(owner);
+    }
+
+    function setPrizeCarryPercent(uint newPrizeCarryPercent) onlyOwner {
+        newRules.prizeCarryPercent = newPrizeCarryPercent;
+        ruleUpdateNeeded = true;
     }
 
     function setEdgePercent(uint newEdgePercent) onlyOwner {

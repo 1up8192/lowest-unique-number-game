@@ -186,21 +186,21 @@ contract LowestUniqueNumberGame {
     }
 
     function noWinnerValueCarry() internal {
-        if (roundList.length == 1) return;
-        if (roundList[SafeMath.safeSub(roundList.length, 2)].winner == 0x0){
-            uint value = roundList[SafeMath.safeSub(roundList.length, 2)].value;
-            roundList[SafeMath.safeSub(roundList.length, 2)].value = 0;
-            roundList[SafeMath.safeSub(roundList.length, 2)].value = value;
+        if (roundList.length <= 2) return;
+        if (roundList[SafeMath.safeSub(roundList.length, 3)].winner == 0x0){
+            uint value = roundList[SafeMath.safeSub(roundList.length, 3)].value;
+            roundList[SafeMath.safeSub(roundList.length, 3)].value = 0;
+            roundList[SafeMath.safeSub(roundList.length, 1)].value += value;
         }
     }
 
     function taxes() internal {
-        if (roundList.length == 1) return;
-        if (roundList[SafeMath.safeSub(roundList.length, 2)].winner != 0x0){
-            uint lastRoundValue = roundList[SafeMath.safeSub(roundList.length, 2)].value;
+        if (roundList.length <= 2) return;
+        if (roundList[SafeMath.safeSub(roundList.length, 3)].winner != 0x0){
+            uint lastRoundValue = roundList[SafeMath.safeSub(roundList.length, 3)].value;
             uint edge = lastRoundValue / 100 * rules.edgePercent;
             uint carry = lastRoundValue / 100 * rules.prizeCarryPercent;
-            roundList[SafeMath.safeSub(roundList.length, 2)].value = SafeMath.safeSub(lastRoundValue, (edge + carry));
+            roundList[SafeMath.safeSub(roundList.length, 3)].value = SafeMath.safeSub(lastRoundValue, (edge + carry));
             roundList[SafeMath.safeSub(roundList.length, 1)].value += carry;
             stash += edge;
         }

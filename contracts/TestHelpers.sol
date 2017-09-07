@@ -7,8 +7,11 @@ contract TestHelpers is LowestUniqueNumberGame{
         return LowestUniqueNumberGame.roundList[roundID].winner;
     }
 
+    function getPrizeCarryPercent() constant returns (uint) {
+        return LowestUniqueNumberGame.rules.prizeCarryPercent;
+    }
+
     function getEdgePercent() constant returns (uint) {
-        LowestUniqueNumberGame.checkForActiveGamePeriod();
         return LowestUniqueNumberGame.rules.edgePercent;
     }
 

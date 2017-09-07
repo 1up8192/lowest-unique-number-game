@@ -11,6 +11,7 @@ contract( "TestHelpers", function(accounts) {
     var hash2;
     var prizeExpected;
     var actualPrize;
+    var prizeCarryPercent;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
       return th.hashNumber.call(number1, "password", accounts[0]);
@@ -34,12 +35,17 @@ contract( "TestHelpers", function(accounts) {
     }).then(function(){
       return th.skipRound(); //one day later...
     }).then(function(){
+      return th.getPrizeCarryPercent.call();
+    }).then(function(_prizeCarryPercent){
+      prizeCarryPercent = _prizeCarryPercent;
       return th.getEdgePercent.call();
     }).then(function(edgePercent){
-      prizeExpected = (number1 + number2) * numberPrice / 100 * (100 - edgePercent);
+      prizeExpected = (number1 + number2) * numberPrice / 100 * (100 - edgePercent - prizeCarryPercent);
       return th.claimPrize(0, {from: accounts[0]});
     }).then(function(result){
       actualPrize = result.logs[0].args.prize.toNumber()
+      console.log("actual: " + actualPrize);
+      console.log("expected: " + prizeExpected);
       assert.equal(actualPrize, prizeExpected, "prize should be as calculated")
     });
   });

@@ -19,6 +19,10 @@ contract TestHelpers is LowestUniqueNumberGame{
         return LowestUniqueNumberGame.rules.periodLength;
     }
 
+    function getPrizeExpiration() constant returns (uint) {
+        return LowestUniqueNumberGame.rules.prizeExpiration;
+    }
+
     function getNumberPrice() constant returns (uint) {
         return LowestUniqueNumberGame.rules.numberPrice;
     }
@@ -37,5 +41,11 @@ contract TestHelpers is LowestUniqueNumberGame{
 
     function skipRound(){
         LowestUniqueNumberGame.startNewRound();
+    }
+
+    function skipRounds(uint n){
+        for(n; n > 0; n-=1){
+            LowestUniqueNumberGame.startNewRound();
+        }
     }
 }

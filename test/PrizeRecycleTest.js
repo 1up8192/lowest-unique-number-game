@@ -12,6 +12,7 @@ contract( "TestHelpers", function(accounts) {
     var prizeExpected;
     var actualPrize;
     var prizeCarryPercent;
+    var expiration;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
       return th.hashNumber.call(number1, "password", accounts[0]);
@@ -23,8 +24,12 @@ contract( "TestHelpers", function(accounts) {
       return th.getNumberPrice.call();
     }).then(function(_numberPrice){
       numberPrice = _numberPrice.toNumber();
+      return th.getPrizeExpiration.call();
+    }).then(function(_expiration){
+      expiration = _expiration.toNumber();
+      console.log(expiration);
       return th.submitSecretNumber(hash1, {from: accounts[0], value: numberPrice * number1});
-    }).then(function(_numberPrice){
+    }).then(function(){
       return th.submitSecretNumber(hash2, {from: accounts[1], value: numberPrice * number2});
     }).then(function(){
       return th.skipRound(); //one day later...
@@ -35,16 +40,19 @@ contract( "TestHelpers", function(accounts) {
     }).then(function(){
       return th.skipRound(); //one day later...
     }).then(function(){
+      return timeTravel.secondsForward(expiration + 60*60*24); //several days and a little later
+    }).then(function(){
       return th.getPrizeCarryPercent.call();
     }).then(function(_prizeCarryPercent){
       prizeCarryPercent = _prizeCarryPercent;
       return th.getEdgePercent.call();
     }).then(function(edgePercent){
       prizeExpected = (number1 + number2) * numberPrice / 100 * (100 - edgePercent - prizeCarryPercent);
-      return th.claimPrize(0, {from: accounts[0]});
+      return th.recyclePrize(0);
+    }).then(function(){
+      return th.getRoundValue.call(2);
     }).then(function(result){
-      actualPrize = result.logs[0].args.prize.toNumber()
-      assert.equal(actualPrize, prizeExpected, "prize should be as calculated")
+      assert(result >= prizeExpected, "recycled prize (+carry prize) should be in the newest round ");
     });
   });
 });

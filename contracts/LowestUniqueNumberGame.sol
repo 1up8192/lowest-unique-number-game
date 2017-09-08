@@ -8,7 +8,7 @@ contract LowestUniqueNumberGame {
     uint stash;
     bool deactivated = false;
     uint deactivationTime;
-    Rules rules = Rules({prizeCarryPercent: 10, edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 1 days, expirationEdgePercent: 50});
+    Rules rules = Rules({prizeCarryPercent: 10, edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 30 days, expirationEdgePercent: 50});
     Round[] public roundList;
     Rules newRules = rules;
     bool ruleUpdateNeeded = false;
@@ -66,7 +66,7 @@ contract LowestUniqueNumberGame {
         return result;
     }
 
-    function prizeExpired(uint roundId) constant returns (bool){
+    function isPrizeExpired(uint roundId) constant returns (bool){
         if( block.timestamp > roundList[roundId].startTime + 2 days + rules.prizeExpiration){
             return true;
         }
@@ -165,7 +165,6 @@ contract LowestUniqueNumberGame {
         require(checkIfClaimable(roundID));
         require(!roundList[roundID].prizeClaimed);
         require(msg.sender == roundList[roundID].winner);
-        require(!prizeExpired(roundID));
         msg.sender.transfer(roundList[roundID].value);
         prizeClaimed(roundList[roundID].value);
         roundList[roundID].prizeClaimed = true;
@@ -180,9 +179,10 @@ contract LowestUniqueNumberGame {
     }
 
     function recyclePrize(uint roundID){
-        require(prizeExpired(roundID));
+        require(isPrizeExpired(roundID));
         roundList[SafeMath.safeSub(roundList.length, 1)].value += roundList[roundID].value / 2;
         stash += roundList[roundID].value / 2;
+        roundList[roundID].prizeClaimed = true;
     }
 
     function noWinnerValueCarry() internal {

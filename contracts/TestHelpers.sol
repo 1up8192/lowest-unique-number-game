@@ -48,4 +48,8 @@ contract TestHelpers is LowestUniqueNumberGame{
             LowestUniqueNumberGame.startNewRound();
         }
     }
+
+    function instantExpireRound(uint roundID){
+        LowestUniqueNumberGame.roundList[roundID].startTime -= 33 days;
+    }
 }

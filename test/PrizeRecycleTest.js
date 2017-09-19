@@ -2,7 +2,7 @@ var timeTravel = require('../testHelperModules/TimeTravel.js');
 var TestHelpers = artifacts.require("TestHelpers");
 
 contract( "TestHelpers", function(accounts) {
-  it("winner should recieve correct prize", function(){
+  it("prize should be correctly recycled (also carry)", function(){
     var th;
     var number1 = 1;
     var number2 = 2;
@@ -13,6 +13,7 @@ contract( "TestHelpers", function(accounts) {
     var actualPrize;
     var prizeCarryPercent;
     var expiration;
+    var carry;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
       return th.hashNumber.call(number1, "password", accounts[0]);
@@ -40,7 +41,8 @@ contract( "TestHelpers", function(accounts) {
     }).then(function(){
       return th.skipRound(); //one day later...
     }).then(function(){
-      return timeTravel.secondsForward(expiration + 60*60*24); //several days and a little later
+      return th.instantExpireRound(0);
+      //return timeTravel.secondsForward(expiration + 60*60*24); //several days and a little later
     }).then(function(){
       return th.getPrizeCarryPercent.call();
     }).then(function(_prizeCarryPercent){
@@ -48,11 +50,13 @@ contract( "TestHelpers", function(accounts) {
       return th.getEdgePercent.call();
     }).then(function(edgePercent){
       prizeExpected = (number1 + number2) * numberPrice / 100 * (100 - edgePercent - prizeCarryPercent);
+      carry = (number1 + number2) * numberPrice / 100 *  prizeCarryPercent;
       return th.recyclePrize(0);
     }).then(function(){
       return th.getRoundValue.call(2);
     }).then(function(result){
-      assert(result >= prizeExpected, "recycled prize (+carry prize) should be in the newest round ");
+      //assert(true, "recycled prize (+carry prize) should be in the newest round ");
+      assert.equal(result , prizeExpected / 2 + carry, "recycled prize (+carry prize) should be in the newest round ");
     });
   });
 });

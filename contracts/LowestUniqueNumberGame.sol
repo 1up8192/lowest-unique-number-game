@@ -37,7 +37,8 @@ contract LowestUniqueNumberGame {
     }
 
     event prizeClaimed(uint indexed prize);
-    event payback(uint indexed prize);
+    event payback(uint indexed value);
+    event finalRefund(uint indexed refund);
 
     function LowestUniqueNumberGame() {
         owner = msg.sender;
@@ -78,10 +79,8 @@ contract LowestUniqueNumberGame {
         return sha3(number, password, sender);
     }
 
-    function newRound() internal constant returns (Round){
+    function newRound() internal constant returns  (Round){
         return Round({startTime: block.timestamp, winner: 0x0, smallestNumber: 0, prizeClaimed: false, value: 0});
-        delete candidatesHeap;
-        if(ruleUpdateNeeded) updateRules();
     }
 
     function checkIfPriceWasPayed(uint number, bytes32 hash) internal constant returns (bool){
@@ -107,6 +106,7 @@ contract LowestUniqueNumberGame {
         noWinnerValueCarry();
         taxes();
         if(ruleUpdateNeeded) updateRules();
+        delete candidatesHeap;
     }
 
     function submitSecretNumber(bytes32 hash) payable onlyActive{
@@ -178,7 +178,7 @@ contract LowestUniqueNumberGame {
         roundList[SafeMath.safeSub(roundList.length, 1)].value += msg.value;
     }
 
-    function recyclePrize(uint roundID){
+    function recyclePrize(uint roundID) onlyActive {
         require(isPrizeExpired(roundID));
         roundList[SafeMath.safeSub(roundList.length, 1)].value += roundList[roundID].value / 2;
         stash += roundList[roundID].value / 2;
@@ -210,7 +210,10 @@ contract LowestUniqueNumberGame {
         require(deactivated);
         require(roundID == SafeMath.safeSub(roundList.length, 1) || roundID == SafeMath.safeSub(roundList.length, 2)); // only last two rounds, older rounds have only prizes for the winners
         require(roundList[roundID].secretNumberAddresses[hash] == msg.sender);
-        msg.sender.transfer(roundList[roundID].payments[hash]);
+        uint refound = roundList[roundID].payments[hash];
+        require(refound != 0);
+        msg.sender.transfer(refound);
+        finalRefund(refound);
         roundList[roundID].payments[hash]=0;
     }
 

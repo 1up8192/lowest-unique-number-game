@@ -4,14 +4,14 @@ import "./MinHeap.sol";
 
 contract LowestUniqueNumberGame {
 
-    address owner;
-    uint stash;
-    bool deactivated = false;
-    uint deactivationTime;
-    Rules rules = Rules({prizeCarryPercent: 10, edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 30 days, expirationEdgePercent: 50});
+    address public owner;
+    uint public stash;
+    bool public deactivated = false;
+    uint public deactivationTime;
+    Rules public rules = Rules({prizeCarryPercent: 10, edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 30 days, expirationEdgePercent: 50});
     Round[] public roundList;
-    Rules newRules = rules;
-    bool ruleUpdateNeeded = false;
+    Rules public newRules = rules;
+    bool public ruleUpdateNeeded = false;
 
     struct Rules{
         uint prizeCarryPercent;
@@ -39,6 +39,7 @@ contract LowestUniqueNumberGame {
     event prizeClaimed(uint indexed prize);
     event payback(uint indexed value);
     event finalRefund(uint indexed refund);
+    event stashPayout(uint indexed payout);
 
     function LowestUniqueNumberGame() {
         owner = msg.sender;
@@ -225,6 +226,7 @@ contract LowestUniqueNumberGame {
             actualAmount = amount;
         }
         owner.transfer(actualAmount);
+        stashPayout(actualAmount);
     }
 
     function deactivate() onlyOwner{

@@ -32,6 +32,8 @@ contract LowestUniqueNumberGame {
         uint startTime;
         address winner;
         uint smallestNumber;
+        uint numberOfGuesses;
+        uint[] numbersUncoveredUnsorted;
         bool prizeClaimed;
         uint value;
     }
@@ -81,7 +83,7 @@ contract LowestUniqueNumberGame {
     }
 
     function newRound() internal constant returns  (Round){
-        return Round({startTime: block.timestamp, winner: 0x0, smallestNumber: 0, prizeClaimed: false, value: 0});
+        return Round({startTime: block.timestamp, winner: 0x0, smallestNumber: 0, numberOfGuesses: 0, numbersUncoveredUnsorted: new uint[](0), prizeClaimed: false, value: 0});
     }
 
     function checkIfPriceWasPayed(uint number, bytes32 hash) internal constant returns (bool){
@@ -119,6 +121,7 @@ contract LowestUniqueNumberGame {
         activeRound.secretNumberAddresses[hash] = msg.sender;
         activeRound.payments[hash] = msg.value;
         activeRound.value += msg.value;
+        activeRound.numberOfGuesses += 1;
     }
 
     function uncoverNumber(uint number, string password) onlyActive{
@@ -132,6 +135,7 @@ contract LowestUniqueNumberGame {
         roundToUncover.secretNumberAddresses[hash] = 0x0; //only uncoverable once, prevents double uncover accidents
         require(checkIfPriceWasPayed(number, hash));
         payBackDifference(number, hash);
+        roundToUncover.numbersUncoveredUnsorted.push(number);
         if(roundToUncover.numbersUncovered[number].length == 0) {
             roundToUncover.numbersUncovered[number].push(msg.sender);
             if (number < roundToUncover.smallestNumber || roundToUncover.smallestNumber == 0){

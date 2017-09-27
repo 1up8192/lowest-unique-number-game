@@ -1,23 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MetaCoin - Truffle Webpack Demo w/ Frontend</title>
+  <title>Smallest Number Game</title>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <link href="./app.css" rel='stylesheet' type='text/css'>
   <script src="./app.js"></script>
 </head>
 <body>
-  <h1>MetaCoin</h1>
-  <h2>Example Truffle Dapp</h2>
-  <h3>You have <span class="black"><span id="balance"></span> META</span></h3>
-
+  <h1>Smallest Number Game</h1>
   <br>
-  <h1>Send MetaCoin</h1>
-  <br><label for="amount">Amount:</label><input type="text" id="amount" placeholder="e.g., 95"></input>
-  <br><label for="receiver">To Address:</label><input type="text" id="receiver" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"></input>
-  <br><br><button id="send" onclick="App.sendCoin()">Send MetaCoin</button>
-  <br><br>
+  <hr>
+  <div id="send">
+    <h2>Send Number</h2>
+    <br>
+    <label for="sendNumberInput">Number: </label>
+    <input type="number" id="sendNumberInput" min="1"></input>
+    <label for="sendPasswordInput">Password: </label>
+    <input type="number" id="sendPasswordInput" ></input>
+    <label for="sendDecoyInput">Decoy (ETH): </label>
+    <input type="number" id="sendrDecoyInput" step="0.001"></input>
+    <label for="sendTransactionPrice">Price: </label>
+    <span id="sendTransactionPrice"></span>
+    <button id="submitNumber" onclick="todo">Send Transaction</button>
+    <br>
+    <hr>
+  </div >
+  <div id="uncover">
+    <h2>Uncover Number</h2>
+    <br>
+    <label for="uncoverNumberInput">Number: </label>
+    <input type="number" id="uncoverNumberInput" min="1"></input>
+    <label for="uncoverPasswordInput">Password: </label>
+    <input type="number" id="uncoverPasswordInput" ></input>
+    <button id="submitUncover" onclick="todo">Send Transaction</button>
+    <br>
+    <hr>
+  </div >
+  <div id="currentStats">
+    <h2>Current Statistics</h2>
+    <br>
+    <label for="activeRoundNumber">Active Round Number: </label>
+    <span id="activeRoundNumber"></span>
+    <label for="activeRoundStartTime">Active Round Start Time: </label>
+    <span id="activeRoundStartTime"></span>
+    <label for="activeRoundRemainingTime">Active Round Remaining Time: </label>
+    <span id="activeRoundRemainingTime"></span>
+    <label for="activeRoundEndTime">Active Round End Time: </label>
+    <span id="activeRoundEndTime"></span>
+    <label for="activeRoundNumberCount">Active Round Number Count: </label>
+    <span id="activeRoundNumberCount"></span>
+    <label for="activeRoundValue">Active Round Ether Value: </label>
+    <span id="activeRoundValue"></span>
+    <br>
+    <label for="uncoverRoundNumber">Uncover Round Number: </label>
+    <span id="uncoverRoundNumber"></span>
+    <label for="uncoverRoundStartTime">Uncover Round Start Time: </label>
+    <span id="uncoverRoundStartTime"></span>
+    <label for="uncoverRoundRemainingTime">Uncover Round Remaining Time: </label>
+    <span id="uncoverRoundRemainingTime"></span>
+    <label for="uncoverRoundEndTime">Uncover Round End Time: </label>
+    <span id="uncoverRoundEndTime"></span>
+    <label for="uncoverRoundNumberCount">Uncover Round Number Count: </label>
+    <span id="uncoverRoundNumberCount"></span>
+    <label for="uncoverRoundUncoverCount">Uncover Round Uncover Count: </label>
+    <span id="uncoverRoundUncoverCount"></span>
+    <label for="uncoverRoundValue">Uncover Round Ether Value: </label>
+    <span id="uncoverRoundValue"></span>
+    <label for="uncoverRoundWinnerNumber">Uncover Round Winner Number: </label>
+    <span id="uncoverRoundWinnerNumber"></span>
+    <label for="uncoverRoundWinner">Uncover Round Winner: </label>
+    <span id="uncoverRoundWinner"></span>
+    <label for="uncoverRoundAllNumbers">Uncover Round All Numbers: </label>
+    <span id="uncoverRoundAllNumbers"></span>
+    <br>
+    <button id="refreshCurrentStats" onclick="todo">Call</button>
+    <br>
+    <hr>
+  </div >
+  <div id="queryRound">
+    <h2>Past Round Statistics</h2>
+    <br>
+    <label for="roundNumberInput">Round Number: </label>
+    <input type="number" id="roundNumberInput" min="1"></input>
+    <button id="submitRoundNumber" onclick="todo">Call</button>
+    <br>
+    <label for="roundNumber">Number: </label>
+    <span id="roundNumber"></span>
+    <label for="roundStartTime">Start Time: </label>
+    <span id="roundStartTime"></span>
+    <label for="roundNumberCount">Number Count: </label>
+    <span id="roundNumberCount"></span>
+    <label for="roundUncoverCount">Uncover Count: </label>
+    <span id="roundUncoverCount"></span>
+    <label for="roundValue">Ether Value: </label>
+    <span id="roundValue"></span>
+    <label for="roundWinnerNumber">Winner Number: </label>
+    <span id="roundWinnerNumber"></span>
+    <label for="roundWinner">Winner: </label>
+    <span id="roundWinner"></span>
+    <label for="roundAllNumbers">All Numbers: </label>
+    <span id="roundAllNumbers"></span>
+    <label for="roundPrizeClaimed">Prize Claimed: </label>
+    <span id="roundPrizeClaimed"></span>
+    <label for="roundPrizeExpired">Prize Expired: </label>
+    <span id="roundPrizeExpired"></span>
+    <br>
+    <hr>
+  </div >
+  <div id="recycleRound">
+    <h2>Recycle Round</h2>
+    <br>
+    <label for="recycleRoundNumberInput">Round Number: </label>
+    <input type="number" id="recycleRoundNumberInput" min="1"></input>
+    <button id="submitRecycleRound" onclick="todo">Send Transaction</button>
+    <br>
+    <hr>
+  </div >
+  <br>
   <span id="status"></span>
-  <br>
-  <span class="hint"><strong>Hint:</strong> open the browser developer console to view any errors and warnings.</span>
 </body>
 </html>

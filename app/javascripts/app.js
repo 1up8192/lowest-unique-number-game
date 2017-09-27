@@ -52,11 +52,12 @@ window.App = {
   },
 
   hashAndSubmitGuess: function() {
-    var number = document.getElementById("sendNumberInput");
-    var password = document.getElementById("sendPasswordInput");
-    var decoy = web3.toWei(document.getElementById("sendDecoyInput"), "ether").toNumber();
+    var number = document.getElementById("sendNumberInput").value;
+    var password = document.getElementById("sendPasswordInput").value;
+    var decoy = parseInt(web3.toWei(document.getElementById("sendDecoyInput").value, "ether"));
     var hash;
     var numberPrice;
+    var lung;
     return LowestUniqueNumberGame.deployed().then(function(instance){
       lung = instance;
       return lung.hashNumber.call(number, password, accounts[0]);
@@ -65,13 +66,17 @@ window.App = {
       return lung.getNumberPrice.call();
     }).then(function(_numberPrice){
       numberPrice = _numberPrice.toNumber();
-      return lung.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number + decoy});
+      console.log(typeof(decoy));
+      console.log(typeof(numberPrice));
+      console.log(decoy);
+      console.log(numberPrice);
+      return lung.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number + decoy, gas: 360000});
     }).then(function(result) {
       console.log(result);
-      self.setStatus("Transaction complete!");
+      //self.setStatus("Transaction complete!");
     }).catch(function(e) {
       console.log(e);
-      self.setStatus("Error; see log.");
+      //self.setStatus("Error; see log.");
     });
   }
 

@@ -18,10 +18,10 @@
     <label for="sendPasswordInput">Password: </label>
     <input type="number" id="sendPasswordInput" ></input>
     <label for="sendDecoyInput">Decoy (ETH): </label>
-    <input type="number" id="sendrDecoyInput" step="0.001"></input>
+    <input type="number" id="sendDecoyInput" step="0.001"></input>
     <label for="sendTransactionPrice">Price: </label>
     <span id="sendTransactionPrice"></span>
-    <button id="submitNumber" onclick="todo">Send Transaction</button>
+    <button id="submitNumber" onclick="App.hashAndSubmitGuess()">Send Transaction</button>
     <br>
     <hr>
   </div >
@@ -39,41 +39,63 @@
   <div id="currentStats">
     <h2>Current Statistics</h2>
     <br>
-    <label for="activeRoundNumber">Active Round Number: </label>
-    <span id="activeRoundNumber"></span>
-    <label for="activeRoundStartTime">Active Round Start Time: </label>
-    <span id="activeRoundStartTime"></span>
-    <label for="activeRoundRemainingTime">Active Round Remaining Time: </label>
-    <span id="activeRoundRemainingTime"></span>
-    <label for="activeRoundEndTime">Active Round End Time: </label>
-    <span id="activeRoundEndTime"></span>
-    <label for="activeRoundNumberCount">Active Round Number Count: </label>
-    <span id="activeRoundNumberCount"></span>
-    <label for="activeRoundValue">Active Round Ether Value: </label>
-    <span id="activeRoundValue"></span>
+    <button id="refreshCurrentStats" onclick="todo">Refresh</button>
     <br>
-    <label for="uncoverRoundNumber">Uncover Round Number: </label>
-    <span id="uncoverRoundNumber"></span>
-    <label for="uncoverRoundStartTime">Uncover Round Start Time: </label>
-    <span id="uncoverRoundStartTime"></span>
-    <label for="uncoverRoundRemainingTime">Uncover Round Remaining Time: </label>
-    <span id="uncoverRoundRemainingTime"></span>
-    <label for="uncoverRoundEndTime">Uncover Round End Time: </label>
-    <span id="uncoverRoundEndTime"></span>
-    <label for="uncoverRoundNumberCount">Uncover Round Number Count: </label>
-    <span id="uncoverRoundNumberCount"></span>
-    <label for="uncoverRoundUncoverCount">Uncover Round Uncover Count: </label>
-    <span id="uncoverRoundUncoverCount"></span>
-    <label for="uncoverRoundValue">Uncover Round Ether Value: </label>
-    <span id="uncoverRoundValue"></span>
-    <label for="uncoverRoundWinnerNumber">Uncover Round Winner Number: </label>
-    <span id="uncoverRoundWinnerNumber"></span>
-    <label for="uncoverRoundWinner">Uncover Round Winner: </label>
-    <span id="uncoverRoundWinner"></span>
-    <label for="uncoverRoundAllNumbers">Uncover Round All Numbers: </label>
-    <span id="uncoverRoundAllNumbers"></span>
-    <br>
-    <button id="refreshCurrentStats" onclick="todo">Call</button>
+    <div id="activeRoundStats">
+      <h3>Active Round</h3>
+      <br>
+      <label for="activeRoundNumber">Number: </label>
+      <span id="activeRoundNumber"></span>
+      <br>
+      <label for="activeRoundStartTime">Start Time: </label>
+      <span id="activeRoundStartTime"></span>
+      <br>
+      <label for="activeRoundRemainingTime">Remaining Time: </label>
+      <span id="activeRoundRemainingTime"></span>
+      <br>
+      <label for="activeRoundEndTime">End Time: </label>
+      <span id="activeRoundEndTime"></span>
+      <br>
+      <label for="activeRoundNumberCount">Number Count: </label>
+      <span id="activeRoundNumberCount"></span>
+      <br>
+      <label for="activeRoundValue">Ether Value: </label>
+      <span id="activeRoundValue"></span>
+      <br>
+    </div>
+    <div id="uncoverRoundStats">
+      <h3>Uncover Round</h3>
+      <br>
+      <label for="uncoverRoundNumber">Number: </label>
+      <span id="uncoverRoundNumber"></span>
+      <br>
+      <label for="uncoverRoundStartTime">Start Time: </label>
+      <span id="uncoverRoundStartTime"></span>
+      <br>
+      <label for="uncoverRoundRemainingTime">Remaining Time: </label>
+      <span id="uncoverRoundRemainingTime"></span>
+      <br>
+      <label for="uncoverRoundEndTime">End Time: </label>
+      <span id="uncoverRoundEndTime"></span>
+      <br>
+      <label for="uncoverRoundNumberCount">Number Count: </label>
+      <span id="uncoverRoundNumberCount"></span>
+      <br>
+      <label for="uncoverRoundUncoverCount">Uncover Count: </label>
+      <span id="uncoverRoundUncoverCount"></span>
+      <br>
+      <label for="uncoverRoundValue">Ether Value: </label>
+      <span id="uncoverRoundValue"></span>
+      <br>
+      <label for="uncoverRoundWinnerNumber">Current Winner Number: </label>
+      <span id="uncoverRoundWinnerNumber"></span>
+      <br>
+      <label for="uncoverRoundWinner">Current Round Winner: </label>
+      <span id="uncoverRoundWinner"></span>
+      <br>
+      <label for="uncoverRoundAllNumbers">All Numbers: </label>
+      <span id="uncoverRoundAllNumbers"></span>
+    </div>
     <br>
     <hr>
   </div >
@@ -82,26 +104,35 @@
     <br>
     <label for="roundNumberInput">Round Number: </label>
     <input type="number" id="roundNumberInput" min="1"></input>
-    <button id="submitRoundNumber" onclick="todo">Call</button>
+    <button id="submitRoundNumber" onclick="todo">Get</button>
     <br>
     <label for="roundNumber">Number: </label>
     <span id="roundNumber"></span>
+    <br>
     <label for="roundStartTime">Start Time: </label>
     <span id="roundStartTime"></span>
+    <br>
     <label for="roundNumberCount">Number Count: </label>
     <span id="roundNumberCount"></span>
+    <br>
     <label for="roundUncoverCount">Uncover Count: </label>
     <span id="roundUncoverCount"></span>
+    <br>
     <label for="roundValue">Ether Value: </label>
     <span id="roundValue"></span>
+    <br>
     <label for="roundWinnerNumber">Winner Number: </label>
     <span id="roundWinnerNumber"></span>
+    <br>
     <label for="roundWinner">Winner: </label>
     <span id="roundWinner"></span>
+    <br>
     <label for="roundAllNumbers">All Numbers: </label>
     <span id="roundAllNumbers"></span>
+    <br>
     <label for="roundPrizeClaimed">Prize Claimed: </label>
     <span id="roundPrizeClaimed"></span>
+    <br>
     <label for="roundPrizeExpired">Prize Expired: </label>
     <span id="roundPrizeExpired"></span>
     <br>

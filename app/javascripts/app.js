@@ -6,10 +6,12 @@ import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract'
 
 // Import our contract artifacts and turn them into usable abstractions.
-import metacoin_artifacts from '../../build/contracts/MetaCoin.json'
+import lung_artifacts from '../../build/contracts/LowestUniqueNumberGame.json'
 
-// MetaCoin is our usable abstraction, which we'll use through the code below.
-var MetaCoin = contract(metacoin_artifacts);
+import tableHelper from 'tableHelper.js'
+
+// HelloWorld is our usable abstraction, which we'll use through the code below.
+var LowestUniqueNumberGame = contract(lung_artifacts);
 
 // The following code is simple to show off interacting with your contracts.
 // As your needs grow you will likely need to change its form and structure.
@@ -22,7 +24,7 @@ window.App = {
     var self = this;
 
     // Bootstrap the MetaCoin abstraction for Use.
-    MetaCoin.setProvider(web3.currentProvider);
+    LowestUniqueNumberGame.setProvider(web3.currentProvider);
 
     // Get the initial account balance so it can be displayed.
     web3.eth.getAccounts(function(err, accs) {
@@ -38,8 +40,9 @@ window.App = {
 
       accounts = accs;
       account = accounts[0];
+      console.log("accounts: ");
+      console.log(accounts);
 
-      self.refreshBalance();
     });
   },
 
@@ -48,43 +51,50 @@ window.App = {
     status.innerHTML = message;
   },
 
-  refreshBalance: function() {
-    var self = this;
-
-    var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.getBalance.call(account, {from: account});
-    }).then(function(value) {
-      var balance_element = document.getElementById("balance");
-      balance_element.innerHTML = value.valueOf();
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error getting balance; see log.");
-    });
-  },
-
-  sendCoin: function() {
-    var self = this;
-
-    var amount = parseInt(document.getElementById("amount").value);
-    var receiver = document.getElementById("receiver").value;
-
-    this.setStatus("Initiating transaction... (please wait)");
-
-    var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.sendCoin(receiver, amount, {from: account});
+  hashAndSubmitGuess: function() {
+    var number = document.getElementById("sendNumberInput");
+    var password = document.getElementById("sendPasswordInput");
+    var decoy = web3.toWei(document.getElementById("sendDecoyInput"), "ether");
+    var hash;
+    var numberPrice;
+    return LowestUniqueNumberGame.deployed().then(function(instance){
+      lung = instance;
+      return lung.hashNumber.call(number, password, accounts[0]);
+    }).then(function(_hash){
+      hash = _hash;
+      return lung.getNumberPrice.call();
+    }).then(function(_numberPrice){
+      numberPrice = _numberPrice.toNumber();
+      return lung.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number + decoy});
     }).then(function() {
       self.setStatus("Transaction complete!");
-      self.refreshBalance();
     }).catch(function(e) {
       console.log(e);
-      self.setStatus("Error sending coin; see log.");
+      self.setStatus("Error; see log.");
     });
   }
-};
+
+/*  watchEvent: function() {
+    var changesTable = document.getElementById("changes")
+    addHeaderRow(changesTable, ["Old greeting:", "New Greeting:", "Changer Address:"])
+
+    var helloWorld;
+    LowestUniqueNumberGame.deployed().then(function(instance) {
+      helloWorld = instance;
+      var eventGreetingChanged = helloWorld.greetingChanged();
+
+      // watch for changes
+      eventGreetingChanged.watch(function(error, result){
+        if (!error){
+          console.log(result);
+        } else {
+          console.log(error);
+        }
+      });
+    });
+  }
+
+};*/
 
 window.addEventListener('load', function() {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
@@ -99,4 +109,7 @@ window.addEventListener('load', function() {
   }
 
   App.start();
+
+  //App.watchEvent();
+
 });

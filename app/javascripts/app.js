@@ -8,7 +8,7 @@ import { default as contract } from 'truffle-contract'
 // Import our contract artifacts and turn them into usable abstractions.
 import lung_artifacts from '../../build/contracts/LowestUniqueNumberGame.json'
 
-import tableHelper from 'tableHelper.js'
+import tableHelper from './tableHelper.js'
 
 // HelloWorld is our usable abstraction, which we'll use through the code below.
 var LowestUniqueNumberGame = contract(lung_artifacts);
@@ -54,7 +54,7 @@ window.App = {
   hashAndSubmitGuess: function() {
     var number = document.getElementById("sendNumberInput");
     var password = document.getElementById("sendPasswordInput");
-    var decoy = web3.toWei(document.getElementById("sendDecoyInput"), "ether");
+    var decoy = web3.toWei(document.getElementById("sendDecoyInput"), "ether").toNumber();
     var hash;
     var numberPrice;
     return LowestUniqueNumberGame.deployed().then(function(instance){
@@ -66,7 +66,8 @@ window.App = {
     }).then(function(_numberPrice){
       numberPrice = _numberPrice.toNumber();
       return lung.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number + decoy});
-    }).then(function() {
+    }).then(function(result) {
+      console.log(result);
       self.setStatus("Transaction complete!");
     }).catch(function(e) {
       console.log(e);
@@ -92,9 +93,9 @@ window.App = {
         }
       });
     });
-  }
+  }*/
 
-};*/
+};
 
 window.addEventListener('load', function() {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)

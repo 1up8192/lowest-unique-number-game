@@ -11,7 +11,7 @@ contract( "TestHelpers", function(accounts) {
     var carryExpected;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
-      return th.hashNumber.call(number1, "password", accounts[0]);
+      return th.hashNumber.call(number1, "password");
     }).then(function(_hash){
       hash1 = _hash;
       return th.getNumberPrice.call();

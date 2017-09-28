@@ -10,7 +10,7 @@ contract( "TestHelpers", function(accounts) {
     var address;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
-      return th.hashNumber.call(1, "password", accounts[0]);
+      return th.hashNumber.call(1, "password");
     }).then(function(_hash){
       hash = _hash;
       return th.getNumberPrice.call();

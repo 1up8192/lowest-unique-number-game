@@ -15,7 +15,7 @@ contract( "TestHelpers", function(accounts) {
     var actualPayback;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
-      return th.hashNumber.call(number, "password", accounts[0]);
+      return th.hashNumber.call(number, "password");
     }).then(function(_hash){
       hash = _hash;
       return th.getNumberPrice.call();

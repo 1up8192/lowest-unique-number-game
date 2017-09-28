@@ -9,6 +9,15 @@
 <body>
   <h1>Smallest Number Game</h1>
   <br>
+  <div id="mode">
+    <label for="testModeCheckbox" >Test mode </label>
+    <input type="checkbox" id="testModeCheckbox" defaultValue="checked" onclick="App.setMode()"></input>
+    <br>
+  </div >
+  <div id="skip">
+    <button id="skipRoundButton" onclick="App.skipRound()">Skip Round</button>
+    <br>
+  </div >
   <hr>
   <div id="send">
     <h2>Send Number</h2>
@@ -38,7 +47,7 @@
     <label for="uncoverPasswordInput">Password: </label>
     <input type="text" id="uncoverPasswordInput" ></input>
     <br>
-    <button id="submitUncover" onclick="todo">Send Transaction</button>
+    <button id="submitUncover" onclick="App.uncoverNumber()">Send Transaction</button>
     <br>
     <hr>
   </div >

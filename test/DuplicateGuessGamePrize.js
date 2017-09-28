@@ -17,16 +17,16 @@ contract( "TestHelpers", function(accounts) {
     var prizeCarryPercent;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
-      return th.hashNumber.call(number1, "password", accounts[0]);
+      return th.hashNumber.call(number1, "password", {from: accounts[0]});
     }).then(function(_hash){
       hash1_1 = _hash;
-      return th.hashNumber.call(number1, "password", accounts[1]);
+      return th.hashNumber.call(number1, "password", {from: accounts[1]});
     }).then(function(_hash){
       hash1_2 = _hash;
-      return th.hashNumber.call(number2, "password", accounts[2]);
+      return th.hashNumber.call(number2, "password", {from: accounts[2]});
     }).then(function(_hash){
       hash2 = _hash;
-      return th.hashNumber.call(number3, "password", accounts[3]);
+      return th.hashNumber.call(number3, "password", {from: accounts[3]});
     }).then(function(_hash){
       hash3 = _hash;
       return th.getNumberPrice.call();

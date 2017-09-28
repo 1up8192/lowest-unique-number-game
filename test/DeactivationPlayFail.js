@@ -13,7 +13,7 @@ contract( "TestHelpers", function(accounts) {
       th = instance;
       return th.deactivate({from: accounts[0]});
     }).then(function(){
-      return th.hashNumber.call(1, "password", accounts[0]);
+      return th.hashNumber.call(1, "password");
     }).then(function(_hash){
       hash = _hash;
       return th.getNumberPrice.call();

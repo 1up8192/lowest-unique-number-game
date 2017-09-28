@@ -3,15 +3,18 @@ import "../stylesheets/app.css";
 
 // Import libraries we need.
 import { default as Web3} from 'web3';
-import { default as contract } from 'truffle-contract'
+import { default as contract } from 'truffle-contract';
 
 // Import our contract artifacts and turn them into usable abstractions.
-import lung_artifacts from '../../build/contracts/LowestUniqueNumberGame.json'
+import lung_artifacts from '../../build/contracts/LowestUniqueNumberGame.json';
+import th_artifacts from '../../build/contracts/TestHelpers.json';
 
-import tableHelper from './tableHelper.js'
+import tableHelper from './tableHelper.js';
 
 // HelloWorld is our usable abstraction, which we'll use through the code below.
 var LowestUniqueNumberGame = contract(lung_artifacts);
+var TestHelpers = contract(th_artifacts)
+var ContractAbstraction = LowestUniqueNumberGame;
 
 // The following code is simple to show off interacting with your contracts.
 // As your needs grow you will likely need to change its form and structure.
@@ -19,12 +22,18 @@ var LowestUniqueNumberGame = contract(lung_artifacts);
 var accounts;
 var account;
 
+var self;
+
+var testMode;
+
 window.App = {
   start: function() {
-    var self = this;
+    self = this;
 
     // Bootstrap the MetaCoin abstraction for Use.
     LowestUniqueNumberGame.setProvider(web3.currentProvider);
+    TestHelpers.setProvider(web3.currentProvider);
+
 
     // Get the initial account balance so it can be displayed.
     web3.eth.getAccounts(function(err, accs) {
@@ -43,6 +52,8 @@ window.App = {
       console.log("accounts: ");
       console.log(accounts);
 
+      self.setMode();
+
     });
   },
 
@@ -57,28 +68,82 @@ window.App = {
     var decoy = parseInt(web3.toWei(document.getElementById("sendDecoyInput").value, "ether"));
     var hash;
     var numberPrice;
-    var lung;
-    return LowestUniqueNumberGame.deployed().then(function(instance){
-      lung = instance;
-      return lung.hashNumber.call(number, password, accounts[0]);
+    var instance;
+    return ContractAbstraction.deployed().then(function(_instance){
+      instance = _instance;
+      return instance.hashNumber.call(number, password);
     }).then(function(_hash){
       hash = _hash;
-      return lung.getNumberPrice.call();
+      return instance.getNumberPrice.call();
     }).then(function(_numberPrice){
       numberPrice = _numberPrice.toNumber();
       console.log(typeof(decoy));
       console.log(typeof(numberPrice));
       console.log(decoy);
       console.log(numberPrice);
-      return lung.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number + decoy, gas: 360000});
+      return instance.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number + decoy, gas: 500000});
     }).then(function(result) {
       console.log(result);
-      //self.setStatus("Transaction complete!");
+      self.setStatus("Transaction complete!");
     }).catch(function(e) {
       console.log(e);
-      //self.setStatus("Error; see log.");
+      self.setStatus("Error; see log.");
     });
+  },
+
+  uncoverNumber: function() {
+    var number = document.getElementById("uncoverNumberInput").value;
+    var password = document.getElementById("uncoverPasswordInput").value;
+    var instance;
+    return ContractAbstraction.deployed().then(function(_instance){
+      instance = _instance;
+      return instance.uncoverNumber(number, password, {from: accounts[0], gas: 1000000});
+    }).then(function(result) {
+      console.log(result);
+      self.setStatus("Transaction complete!");
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error; see log.");
+    });
+  },
+
+  skipRound: function() {
+    var instance;
+    return ContractAbstraction.deployed().then(function(_instance){
+      instance = _instance;
+      return instance.skipRound({from: accounts[0], gas: 200000});
+    }).then(function(result) {
+      console.log("Round skipped!")
+      console.log(result);
+      self.setStatus("Transaction complete!");
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error; see log.");
+    });
+  },
+
+  toggleSkipDisplay: function() {
+    var skip = document.getElementById("skip");
+    if(testMode){
+      skip.style.display = 'block';
+    } else {
+        skip.style.display = 'none';
+    }
+  },
+
+  setMode: function() {
+    testMode = document.getElementById("testModeCheckbox").checked;
+    self.toggleSkipDisplay();
+    if (testMode == true){
+      ContractAbstraction = TestHelpers;
+      console.log("test mode");
+    } else {
+      ContractAbstraction = LowestUniqueNumberGame;
+      console.log("game mode");
+    }
   }
+
+
 
 /*  watchEvent: function() {
     var changesTable = document.getElementById("changes")

@@ -14,7 +14,7 @@ contract( "TestHelpers", function(accounts) {
     var secondNewPrice;
     return TestHelpers.deployed().then(function(instance){
       th = instance;
-      return th.hashNumber.call(number1, "password", accounts[1]);
+      return th.hashNumber.call(number1, "password", {from: accounts[1]});
     }).then(function(_hash){
       hash1 = _hash;
       return th.getNumberPrice.call();

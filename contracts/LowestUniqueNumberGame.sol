@@ -77,7 +77,12 @@ contract LowestUniqueNumberGame {
         return false;
     }
 
-    function hashNumber(uint number, string password, address sender) constant returns (bytes32){
+    function hashNumber(uint number, string password) constant returns (bytes32){
+        require(number != 0);
+        return sha3(number, password, msg.sender);
+    }
+
+    function hashNumberInternal(uint number, string password, address sender) internal constant returns (bytes32){
         require(number != 0);
         return sha3(number, password, sender);
     }
@@ -128,7 +133,7 @@ contract LowestUniqueNumberGame {
         if (!checkForActiveGamePeriod()) {
             startNewRound();
         }
-        bytes32 hash = hashNumber(number, password, msg.sender);
+        bytes32 hash = hashNumberInternal(number, password, msg.sender);
         require(number != 0);
         Round storage roundToUncover = roundList[SafeMath.safeSub(roundList.length, 2)];
         require(roundToUncover.secretNumberAddresses[hash] == msg.sender);

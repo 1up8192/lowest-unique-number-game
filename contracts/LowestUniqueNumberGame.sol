@@ -319,4 +319,25 @@ contract LowestUniqueNumberGame {
     function getRoundValue(uint roundID) constant returns (uint){
         return roundList[roundID].value;
     }
+
+    function getStartTime(uint roundID) constant returns (uint){
+        return roundList[roundID].startTime;
+    }
+
+    function getSmallestNumber(uint roundID) constant returns (uint){
+        return roundList[roundID].smallestNumber;
+    }
+
+    function getNumberOfGuesses(uint roundID) constant returns (uint){
+        return roundList[roundID].numberOfGuesses;
+    }
+
+    function getNumberOfUncovers(uint roundID) constant returns (uint){
+        return roundList[roundID].numbersUncoveredUnsorted.length;
+    }
+
+    function getPrizeClaimed(uint roundID) constant returns (bool){
+        return roundList[roundID].prizeClaimed;
+    }
+
 }

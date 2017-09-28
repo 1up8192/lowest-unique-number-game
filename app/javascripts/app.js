@@ -71,18 +71,15 @@ window.App = {
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.hashNumber.call(number, password);
+      return instance.hashNumber.call(number, password, {from: accounts[0]});
     }).then(function(_hash){
       hash = _hash;
       return instance.getNumberPrice.call();
     }).then(function(_numberPrice){
       numberPrice = _numberPrice.toNumber();
-      console.log(typeof(decoy));
-      console.log(typeof(numberPrice));
-      console.log(decoy);
-      console.log(numberPrice);
       return instance.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number + decoy, gas: 500000});
     }).then(function(result) {
+      console.log("sercet number submitted");
       console.log(result);
       self.setStatus("Transaction complete!");
     }).catch(function(e) {
@@ -99,11 +96,75 @@ window.App = {
       instance = _instance;
       return instance.uncoverNumber(number, password, {from: accounts[0], gas: 1000000});
     }).then(function(result) {
+      console.log("number uncovered")
       console.log(result);
       self.setStatus("Transaction complete!");
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error; see log.");
+    });
+  },
+
+  getRoundStats: function(roundId) {
+    var startTime;
+    var winner;
+    var smallestNumber;
+    var numberOfGuesses;
+    var numberOfUncovers;
+    var prizeClaimed;
+    var value;
+    var instance;
+    return ContractAbstraction.deployed().then(function(_instance){
+      instance = _instance;
+      return instance.getStartTime.call(roundId);
+    }).then(function(_startTime) {
+      startTime = _startTime.toNumber();
+      return instance.getWinner.call(roundId);
+    }).then(function(_winner) {
+      winner = _winner.toString();
+      return instance.getSmallestNumber.call(roundId);
+    }).then(function(_smallestNumber) {
+      smallestNumber = _smallestNumber.toNumber();
+      return instance.getNumberOfGuesses.call(roundId);
+    }).then(function(_numberOfGuesses) {
+      numberOfGuesses = _numberOfGuesses.toNumber();
+      return instance.getNumberOfUncovers.call(roundId);
+    }).then(function(_numberOfUncovers) {
+      numberOfUncovers = _numberOfUncovers.toNumber();
+      return instance.getPrizeClaimed.call(roundId);
+    }).then(function(_prizeClaimed) {
+      prizeClaimed = _prizeClaimed;
+      return instance.getRoundValue.call(roundId);
+    }).then(function(_value) {
+      value = _value.toNumber();
+      var result = {
+        startTime: startTime,
+        winner: winner,
+        smallestNumber: smallestNumber,
+        numberOfGuesses: numberOfGuesses,
+        numberOfUncovers: numberOfUncovers,
+        prizeClaimed: prizeClaimed,
+        value: value
+      };
+      console.log("queried round stats");
+      console.log(result);
+      return result;
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error; see log.");
+    });
+  },
+
+  getPastRoundStats: function() {
+    var roundId = document.getElementById("roundNumberInput").value - 1;
+    return self.getRoundStats(roundId).then(function(roundData){
+      document.getElementById("roundStartTime").innerHTML = roundData.startTime;
+      document.getElementById("roundNumberCount").innerHTML = roundData.numberOfGuesses;
+      document.getElementById("roundUncoverCount").innerHTML = roundData.numberOfUncovers;
+      document.getElementById("roundValue").innerHTML = roundData.roundValue;
+      document.getElementById("roundWinnerNumber").innerHTML = roundData.smallestNumber;
+      document.getElementById("roundWinner").innerHTML = roundData.winner;
+      document.getElementById("roundPrizeClaimed").innerHTML = roundData.prizeClaimed;
     });
   },
 
@@ -113,7 +174,7 @@ window.App = {
       instance = _instance;
       return instance.skipRound({from: accounts[0], gas: 200000});
     }).then(function(result) {
-      console.log("Round skipped!")
+      console.log("round skipped")
       console.log(result);
       self.setStatus("Transaction complete!");
     }).catch(function(e) {

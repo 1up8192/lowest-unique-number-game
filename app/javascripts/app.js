@@ -365,6 +365,7 @@ window.App = {
     return self.getRules().then(function(rules){
       var numberPrice = rules.numberPrice;
       document.getElementById("sendDecoyInput").value = numberPrice * Math.floor(Math.random() * 100);
+      self.calculatePrice();
     });
   },
 

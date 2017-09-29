@@ -225,6 +225,7 @@ window.App = {
     self.refreshActiveRoundStatsDisplay();
     self.refreshUncoverRoundStatsDisplay();
     self.refreshLastClosedRoundStatsDisplay();
+    self.calculatePrice();
   },
 
   refreshRulesDisplay: function(){
@@ -358,9 +359,27 @@ window.App = {
       ContractAbstraction = LowestUniqueNumberGame;
       console.log("game mode");
     }
+  },
+
+  calculateDecoy: function() {
+    return self.getRules().then(function(rules){
+      var numberPrice = rules.numberPrice;
+      document.getElementById("sendDecoyInput").value = numberPrice * Math.floor(Math.random() * 100);
+    });
+  },
+
+  calculatePrice: function() {
+    return self.getRules().then(function(rules){
+      var numberPrice = parseFloat(rules.numberPrice);
+      var number = parseFloat(document.getElementById("sendNumberInput").value);
+      var decoy = parseFloat(document.getElementById("sendDecoyInput").value);
+      document.getElementById("sendTransactionPrice").innerHTML = (number * numberPrice + decoy).toFixed(Math.ceil(Math.abs(self.getBaseLog(10, numberPrice))));
+    });
+  },
+
+  getBaseLog: function(x, y) {
+    return Math.log(y) / Math.log(x);
   }
-
-
 
 /*  watchEvent: function() {
     var changesTable = document.getElementById("changes")

@@ -53,6 +53,7 @@ window.App = {
       console.log(accounts);
 
       self.setMode();
+      self.refreshAllStats();
 
     });
   },
@@ -136,7 +137,7 @@ window.App = {
       prizeClaimed = _prizeClaimed;
       return instance.getRoundValue.call(roundId);
     }).then(function(_value) {
-      value = _value.toNumber();
+      value = web3.fromWei(_value, "ether").toNumber();
       var result = {
         startTime: startTime,
         winner: winner,
@@ -155,17 +156,172 @@ window.App = {
     });
   },
 
+  getRules: function(){
+    var prizeCarryPercent;
+    var edgePercent;
+    var periodLength;
+    var numberPrice;
+    var prizeExpiration;
+    var expirationEdgePercent;
+    var instance;
+    return ContractAbstraction.deployed().then(function(_instance){
+      instance = _instance;
+      return instance.getPrizeCarryPercent.call();
+    }).then(function(_prizeCarryPercent) {
+      prizeCarryPercent = _prizeCarryPercent.toNumber();
+      return instance.getEdgePercent.call();
+    }).then(function(_edgePercent) {
+      edgePercent = _edgePercent.toNumber();
+      return instance.getPeriodLength.call();
+    }).then(function(_periodLength) {
+      periodLength = _periodLength.toNumber();
+      return instance.getNumberPrice.call();
+    }).then(function(_numberPrice) {
+      numberPrice = web3.fromWei(_numberPrice, "ether").toNumber();
+      return instance.getPrizeExpiration.call();
+    }).then(function(_prizeExpiration) {
+      prizeExpiration = _prizeExpiration.toNumber();
+      return instance.getExpirationEdgePercent.call();
+    }).then(function(_expirationEdgePercent) {
+      expirationEdgePercent = _expirationEdgePercent.toNumber();
+      var result = {
+        prizeCarryPercent: prizeCarryPercent,
+        edgePercent: edgePercent,
+        periodLength: periodLength,
+        numberPrice: numberPrice,
+        prizeExpiration: prizeExpiration,
+        expirationEdgePercent: expirationEdgePercent
+      };
+      console.log("queried rules");
+      console.log(result);
+      return result;
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error; see log.");
+    });
+  },
+
   getPastRoundStats: function() {
     var roundId = document.getElementById("roundNumberInput").value - 1;
-    return self.getRoundStats(roundId).then(function(roundData){
+    var roundData
+    return self.getRoundStats(roundId).then(function(_roundData){
+      roundData = _roundData;
+      return self.getRules();
+    }).then(function(rules){
+      var isPrizeExpired = self.isExpired(roundData.startTime, rules.prizeExpiration);
       document.getElementById("roundStartTime").innerHTML = roundData.startTime;
       document.getElementById("roundNumberCount").innerHTML = roundData.numberOfGuesses;
       document.getElementById("roundUncoverCount").innerHTML = roundData.numberOfUncovers;
-      document.getElementById("roundValue").innerHTML = roundData.roundValue;
+      document.getElementById("roundValue").innerHTML = roundData.value;
       document.getElementById("roundWinnerNumber").innerHTML = roundData.smallestNumber;
       document.getElementById("roundWinner").innerHTML = roundData.winner;
       document.getElementById("roundPrizeClaimed").innerHTML = roundData.prizeClaimed;
+      document.getElementById("roundPrizeExpired").innerHTML = isPrizeExpired;
     });
+  },
+
+  refreshAllStats: function(){
+    self.refreshRulesDisplay();
+    self.refreshActiveRoundStatsDisplay();
+    self.refreshUncoverRoundStatsDisplay();
+    self.refreshLastClosedRoundStatsDisplay();
+  },
+
+  refreshRulesDisplay: function(){
+    return self.getRules().then(function(rules){
+      document.getElementById("prizeCarryPercent").innerHTML = rules.prizeCarryPercent;
+      document.getElementById("edgePercent").innerHTML = rules.edgePercent;
+      document.getElementById("periodLength").innerHTML = rules.periodLength;
+      document.getElementById("numberPrice").innerHTML = rules.numberPrice;
+      document.getElementById("prizeExpiration").innerHTML = rules.prizeExpiration;
+      document.getElementById("expirationEdgePercent").innerHTML = rules.expirationEdgePercent;
+    });
+  },
+
+  refreshActiveRoundStatsDisplay: function(){
+    var numberOfRounds;
+    var activeRoundData;
+    return self.getNumberOfRounds().then(function(_numberOfRounds){
+      numberOfRounds = _numberOfRounds;
+      return self.getRoundStats(numberOfRounds - 1);
+    }).then(function(_roundData){
+      activeRoundData = _roundData;
+      return self.getRules();
+    }).then(function(rules){
+      document.getElementById("activeRoundNumber").innerHTML = numberOfRounds;
+      document.getElementById("activeRoundStartTime").innerHTML = activeRoundData.startTime;
+      document.getElementById("activeRoundRemainingTime").innerHTML = (activeRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000);
+      document.getElementById("activeRoundEndTime").innerHTML = activeRoundData.startTime + rules.periodLength;
+      document.getElementById("activeRoundNumberCount").innerHTML = activeRoundData.numberOfGuesses;
+      document.getElementById("activeRoundValue").innerHTML = activeRoundData.value;
+    });
+  },
+
+  refreshUncoverRoundStatsDisplay: function(){
+    var numberOfRounds;
+    var uncoverRoundData;
+    return self.getNumberOfRounds().then(function(_numberOfRounds){
+      numberOfRounds = _numberOfRounds;
+      return self.getRoundStats(numberOfRounds - 2);
+    }).then(function(_roundData){
+      uncoverRoundData = _roundData;
+      return self.getRules();
+    }).then(function(rules){
+      document.getElementById("uncoverRoundNumber").innerHTML = numberOfRounds - 1;
+      document.getElementById("uncoverRoundStartTime").innerHTML = uncoverRoundData.startTime;
+      document.getElementById("uncoverRoundRemainingTime").innerHTML = (uncoverRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000);
+      document.getElementById("uncoverRoundEndTime").innerHTML = uncoverRoundData.startTime + rules.periodLength;;
+      document.getElementById("uncoverRoundNumberCount").innerHTML = uncoverRoundData.numberOfGuesses;
+      document.getElementById("uncoverRoundUncoverCount").innerHTML = uncoverRoundData.numberOfUncovers;
+      document.getElementById("uncoverRoundValue").innerHTML = uncoverRoundData.value;
+      document.getElementById("uncoverRoundWinnerNumber").innerHTML = uncoverRoundData.smallestNumber;
+      document.getElementById("uncoverRoundWinner").innerHTML = uncoverRoundData.winner;
+    });
+  },
+
+  refreshLastClosedRoundStatsDisplay: function(){
+    var numberOfRounds;
+    var lastClosedRoundData;
+    return self.getNumberOfRounds().then(function(_numberOfRounds){
+      numberOfRounds = _numberOfRounds;
+      return self.getRoundStats(numberOfRounds - 3);
+    }).then(function(_roundData){
+      lastClosedRoundData = _roundData;
+      return self.getRules();
+    }).then(function(rules){
+      document.getElementById("lastClosedRoundNumber").innerHTML = numberOfRounds - 2;
+      document.getElementById("lastClosedRoundStartTime").innerHTML = lastClosedRoundData.startTime;
+      document.getElementById("lastClosedRoundRemainingTime").innerHTML = (lastClosedRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000);
+      document.getElementById("lastClosedRoundEndTime").innerHTML = lastClosedRoundData.startTime + rules.periodLength;;
+      document.getElementById("lastClosedRoundNumberCount").innerHTML = lastClosedRoundData.numberOfGuesses;
+      document.getElementById("lastClosedRoundUncoverCount").innerHTML = lastClosedRoundData.numberOfUncovers;
+      document.getElementById("lastClosedRoundValue").innerHTML = lastClosedRoundData.value;
+      document.getElementById("lastClosedRoundWinnerNumber").innerHTML = lastClosedRoundData.smallestNumber;
+      document.getElementById("lastClosedRoundWinner").innerHTML = lastClosedRoundData.winner;
+    });
+  },
+
+  getNumberOfRounds: function(){
+    var instance;
+    return ContractAbstraction.deployed().then(function(_instance){
+      instance = _instance;
+      return instance.getNumberOfRounds.call();
+    }).then(function(result) {
+      console.log("queried number of rounds");
+      console.log(result);
+      return result;
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error; see log.");
+    });
+  },
+
+  isExpired: function(startTime, expiryTime){
+    if(startTime + expiryTime < Math.floor(Date.now() / 1000)){
+      return true;
+    } else {
+      return false;
+    }
   },
 
   skipRound: function() {

@@ -274,7 +274,7 @@ contract LowestUniqueNumberGame {
         ruleUpdateNeeded = true;
     }
 
-    function expirationEdgePercent(uint newExpirationEdgePercent) onlyOwner{
+    function setExpirationEdgePercent(uint newExpirationEdgePercent) onlyOwner{
         newRules.expirationEdgePercent = newExpirationEdgePercent;
         ruleUpdateNeeded = true;
     }
@@ -302,6 +302,10 @@ contract LowestUniqueNumberGame {
 
     function getPrizeExpiration() constant returns (uint) {
         return rules.prizeExpiration;
+    }
+
+    function getExpirationEdgePercent() constant returns (uint) {
+        return rules.expirationEdgePercent;
     }
 
     function getNumberPrice() constant returns (uint) {

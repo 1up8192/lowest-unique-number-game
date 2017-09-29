@@ -54,8 +54,30 @@
   <div id="currentStats">
     <h2>Current Statistics</h2>
     <br>
-    <button id="refreshCurrentStats" onclick="todo">Refresh</button>
+    <button id="refreshCurrentStats" onclick="App.refreshAllStats()">Refresh</button>
     <br>
+    <div id="rules">
+      <h3>Rules</h3>
+      <br>
+      <label for="prizeCarryPercent">Prize carry for next round: </label>
+      <span id="prizeCarryPercent"></span>
+      <br>
+      <label for="edgePercent">House edge: </label>
+      <span id="edgePercent"></span>
+      <br>
+      <label for="periodLength">Period length: </label>
+      <span id="periodLength"></span>
+      <br>
+      <label for="numberPrice">Number price: </label>
+      <span id="numberPrice"></span>
+      <br>
+      <label for="prizeExpiration">Prize expiration time: </label>
+      <span id="prizeExpiration"></span>
+      <br>
+      <label for="expirationEdgePercent">Expiration house edge: </label>
+      <span id="expirationEdgePercent"></span>
+      <br>
+    </div>
     <div id="activeRoundStats">
       <h3>Active Round</h3>
       <br>
@@ -110,6 +132,44 @@
       <br>
       <label for="uncoverRoundAllNumbers">All Numbers: </label>
       <span id="uncoverRoundAllNumbers"></span>
+      <br>
+    </div>
+    <div id="lastClosedRoundStats">
+      <h3>Last Closed Round</h3>
+      <br>
+      <label for="lastClosedRoundNumber">Number: </label>
+      <span id="lastClosedRoundNumber"></span>
+      <br>
+      <label for="lastClosedRoundStartTime">Start Time: </label>
+      <span id="lastClosedRoundStartTime"></span>
+      <br>
+      <label for="lastClosedRoundRemainingTime">Remaining Time: </label>
+      <span id="lastClosedRoundRemainingTime"></span>
+      <br>
+      <label for="lastClosedRoundEndTime">End Time: </label>
+      <span id="lastClosedRoundEndTime"></span>
+      <br>
+      <label for="lastClosedRoundNumberCount">Number Count: </label>
+      <span id="lastClosedRoundNumberCount"></span>
+      <br>
+      <label for="lastClosedRoundUncoverCount">Uncover Count: </label>
+      <span id="lastClosedRoundUncoverCount"></span>
+      <br>
+      <label for="lastClosedRoundValue">Ether Value: </label>
+      <span id="lastClosedRoundValue"></span>
+      <br>
+      <label for="lastClosedRoundWinnerNumber">Current Winner Number: </label>
+      <span id="lastClosedRoundWinnerNumber"></span>
+      <br>
+      <label for="lastClosedRoundWinner">Current Round Winner: </label>
+      <span id="lastClosedRoundWinner"></span>
+      <br>
+      <label for="lastClosedRoundAllNumbers">All Numbers: </label>
+      <span id="lastClosedRoundAllNumbers"></span>
+      <br>
+      <label for="lastClosedRoundPrizeClaimed">Prize Claimed: </label>
+      <span id="lastClosedRoundPrizeClaimed"></span>
+      <br>
     </div>
     <br>
     <hr>

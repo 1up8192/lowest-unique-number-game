@@ -13,6 +13,8 @@ import tableHelper from './tableHelper.js';
 
 import * as moment from 'moment'
 
+var asyncWhile = require("async-while");
+
 // HelloWorld is our usable abstraction, which we'll use through the code below.
 var LowestUniqueNumberGame = contract(lung_artifacts);
 var TestHelpers = contract(th_artifacts)
@@ -219,6 +221,7 @@ window.App = {
       document.getElementById("roundValue").innerHTML = roundData.value + " ETH";
       document.getElementById("roundWinnerNumber").innerHTML = roundData.smallestNumber;
       document.getElementById("roundWinner").innerHTML = roundData.winner;
+      document.getElementById("roundAllNumbers").innerHTML = self.getAllNumbers(roundId);
       document.getElementById("roundPrizeClaimed").innerHTML = roundData.prizeClaimed;
       document.getElementById("roundPrizeExpired").innerHTML = isPrizeExpired;
     });
@@ -342,6 +345,29 @@ window.App = {
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error; see log.");
+    });
+  },
+
+  getAllNumbers: function(roundID) {
+    var instance;
+    var results = [];
+    return ContractAbstraction.deployed().then(function(_instance){
+      instance = _instance;
+      return instance.getNumberOfUncovers.call(roundID);
+    }).then(function(result) {
+      var lenght = result;
+      var index = -1;
+      return asyncWhile(function() {
+        // bump index before every loop
+        index += 1;
+
+        // synchronously checks if there are more
+        return index < lenght;
+      }, function() {
+        return instance.getUncoveredNumber.call(roundID, index).then(function(result) {
+          return results.push(result);
+        });
+      });
     });
   },
 

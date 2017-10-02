@@ -352,6 +352,10 @@ contract LowestUniqueNumberGame {
         return roundList[roundID].numbersUncoveredUnsorted.length;
     }
 
+    function getUncoveredNumber(uint roundID, uint i) constant returns (uint){
+        return roundList[roundID].numbersUncoveredUnsorted[i];
+    }
+
     function getPrizeClaimed(uint roundID) constant returns (bool){
         return roundList[roundID].prizeClaimed;
     }

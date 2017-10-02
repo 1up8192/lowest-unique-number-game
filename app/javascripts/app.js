@@ -11,6 +11,8 @@ import th_artifacts from '../../build/contracts/TestHelpers.json';
 
 import tableHelper from './tableHelper.js';
 
+import * as moment from 'moment'
+
 // HelloWorld is our usable abstraction, which we'll use through the code below.
 var LowestUniqueNumberGame = contract(lung_artifacts);
 var TestHelpers = contract(th_artifacts)
@@ -83,6 +85,7 @@ window.App = {
       console.log("sercet number submitted");
       console.log(result);
       self.setStatus("Transaction complete!");
+      self.refreshActiveRoundStatsDisplay();
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error; see log.");
@@ -100,6 +103,7 @@ window.App = {
       console.log("number uncovered")
       console.log(result);
       self.setStatus("Transaction complete!");
+      self.refreshUncoverRoundStatsDisplay();
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error; see log.");
@@ -209,10 +213,10 @@ window.App = {
       return self.getRules();
     }).then(function(rules){
       var isPrizeExpired = self.isExpired(roundData.startTime, rules.prizeExpiration);
-      document.getElementById("roundStartTime").innerHTML = roundData.startTime;
+      document.getElementById("roundStartTime").innerHTML = self.timestampToDateTime(roundData.startTime);
       document.getElementById("roundNumberCount").innerHTML = roundData.numberOfGuesses;
       document.getElementById("roundUncoverCount").innerHTML = roundData.numberOfUncovers;
-      document.getElementById("roundValue").innerHTML = roundData.value;
+      document.getElementById("roundValue").innerHTML = roundData.value + " ETH";
       document.getElementById("roundWinnerNumber").innerHTML = roundData.smallestNumber;
       document.getElementById("roundWinner").innerHTML = roundData.winner;
       document.getElementById("roundPrizeClaimed").innerHTML = roundData.prizeClaimed;
@@ -230,12 +234,12 @@ window.App = {
 
   refreshRulesDisplay: function(){
     return self.getRules().then(function(rules){
-      document.getElementById("prizeCarryPercent").innerHTML = rules.prizeCarryPercent;
-      document.getElementById("edgePercent").innerHTML = rules.edgePercent;
-      document.getElementById("periodLength").innerHTML = rules.periodLength;
-      document.getElementById("numberPrice").innerHTML = rules.numberPrice;
-      document.getElementById("prizeExpiration").innerHTML = rules.prizeExpiration;
-      document.getElementById("expirationEdgePercent").innerHTML = rules.expirationEdgePercent;
+      document.getElementById("prizeCarryPercent").innerHTML = rules.prizeCarryPercent + "%";
+      document.getElementById("edgePercent").innerHTML = rules.edgePercent + "%";
+      document.getElementById("periodLength").innerHTML = self.timestampToTime(rules.periodLength);
+      document.getElementById("numberPrice").innerHTML = rules.numberPrice + " ETH";
+      document.getElementById("prizeExpiration").innerHTML = self.timestampToDays(rules.prizeExpiration);
+      document.getElementById("expirationEdgePercent").innerHTML = rules.expirationEdgePercent + "%";
     });
   },
 
@@ -250,11 +254,11 @@ window.App = {
       return self.getRules();
     }).then(function(rules){
       document.getElementById("activeRoundNumber").innerHTML = numberOfRounds;
-      document.getElementById("activeRoundStartTime").innerHTML = activeRoundData.startTime;
-      document.getElementById("activeRoundRemainingTime").innerHTML = (activeRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000);
-      document.getElementById("activeRoundEndTime").innerHTML = activeRoundData.startTime + rules.periodLength;
+      document.getElementById("activeRoundStartTime").innerHTML = self.timestampToDateTime(activeRoundData.startTime);
+      document.getElementById("activeRoundRemainingTime").innerHTML = self.timestampToTime( (activeRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
+      document.getElementById("activeRoundEndTime").innerHTML = self.timestampToDateTime(activeRoundData.startTime + rules.periodLength);
       document.getElementById("activeRoundNumberCount").innerHTML = activeRoundData.numberOfGuesses;
-      document.getElementById("activeRoundValue").innerHTML = activeRoundData.value;
+      document.getElementById("activeRoundValue").innerHTML = activeRoundData.value + " ETH";
     });
   },
 
@@ -269,12 +273,12 @@ window.App = {
       return self.getRules();
     }).then(function(rules){
       document.getElementById("uncoverRoundNumber").innerHTML = numberOfRounds - 1;
-      document.getElementById("uncoverRoundStartTime").innerHTML = uncoverRoundData.startTime;
-      document.getElementById("uncoverRoundRemainingTime").innerHTML = (uncoverRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000);
-      document.getElementById("uncoverRoundEndTime").innerHTML = uncoverRoundData.startTime + rules.periodLength;;
+      document.getElementById("uncoverRoundStartTime").innerHTML = self.timestampToDateTime(uncoverRoundData.startTime);
+      document.getElementById("uncoverRoundRemainingTime").innerHTML = self.timestampToTime( (uncoverRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
+      document.getElementById("uncoverRoundEndTime").innerHTML = self.timestampToDateTime(uncoverRoundData.startTime + rules.periodLength);
       document.getElementById("uncoverRoundNumberCount").innerHTML = uncoverRoundData.numberOfGuesses;
       document.getElementById("uncoverRoundUncoverCount").innerHTML = uncoverRoundData.numberOfUncovers;
-      document.getElementById("uncoverRoundValue").innerHTML = uncoverRoundData.value;
+      document.getElementById("uncoverRoundValue").innerHTML = uncoverRoundData.value + " ETH";
       document.getElementById("uncoverRoundWinnerNumber").innerHTML = uncoverRoundData.smallestNumber;
       document.getElementById("uncoverRoundWinner").innerHTML = uncoverRoundData.winner;
     });
@@ -291,14 +295,15 @@ window.App = {
       return self.getRules();
     }).then(function(rules){
       document.getElementById("lastClosedRoundNumber").innerHTML = numberOfRounds - 2;
-      document.getElementById("lastClosedRoundStartTime").innerHTML = lastClosedRoundData.startTime;
-      document.getElementById("lastClosedRoundRemainingTime").innerHTML = (lastClosedRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000);
-      document.getElementById("lastClosedRoundEndTime").innerHTML = lastClosedRoundData.startTime + rules.periodLength;;
+      document.getElementById("lastClosedRoundStartTime").innerHTML = self.timestampToDateTime(lastClosedRoundData.startTime);
+      document.getElementById("lastClosedRoundRemainingTime").innerHTML = self.timestampToTime( (lastClosedRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
+      document.getElementById("lastClosedRoundEndTime").innerHTML = self.timestampToDateTime( lastClosedRoundData.startTime + rules.periodLength);
       document.getElementById("lastClosedRoundNumberCount").innerHTML = lastClosedRoundData.numberOfGuesses;
       document.getElementById("lastClosedRoundUncoverCount").innerHTML = lastClosedRoundData.numberOfUncovers;
-      document.getElementById("lastClosedRoundValue").innerHTML = lastClosedRoundData.value;
+      document.getElementById("lastClosedRoundValue").innerHTML = lastClosedRoundData.value + " ETH";
       document.getElementById("lastClosedRoundWinnerNumber").innerHTML = lastClosedRoundData.smallestNumber;
       document.getElementById("lastClosedRoundWinner").innerHTML = lastClosedRoundData.winner;
+      document.getElementById("lastClosedRoundPrizeClaimed").innerHTML = lastClosedRoundData.prizeClaimed;
     });
   },
 
@@ -370,16 +375,41 @@ window.App = {
   },
 
   calculatePrice: function() {
+    if(document.getElementById("sendNumberInput").value && document.getElementById("sendDecoyInput").value)
     return self.getRules().then(function(rules){
       var numberPrice = parseFloat(rules.numberPrice);
       var number = parseFloat(document.getElementById("sendNumberInput").value);
       var decoy = parseFloat(document.getElementById("sendDecoyInput").value);
-      document.getElementById("sendTransactionPrice").innerHTML = (number * numberPrice + decoy).toFixed(Math.ceil(Math.abs(self.getBaseLog(10, numberPrice))));
+      document.getElementById("sendTransactionPrice").innerHTML = (number * numberPrice + decoy).toFixed(Math.ceil(Math.abs(self.getBaseLog(10, numberPrice)))) + " ETH";
     });
   },
 
   getBaseLog: function(x, y) {
     return Math.log(y) / Math.log(x);
+  },
+
+  timestampToTime: function(timestamp){
+    var hours = Math.floor(timestamp/3600);
+    var remainingTime = timestamp % 3600;
+
+    var minutes = Math.floor(remainingTime / 60);
+    remainingTime = remainingTime % 60;
+
+    var seconds = remainingTime;
+
+    var formattedTime = '';
+    if (parseInt(hours) > 0) formattedTime += hours + ' hours';
+    if (parseInt(minutes) > 0) formattedTime += ', ' + minutes + ' minutes';
+    if (parseInt(seconds) > 0) formattedTime += ', ' + seconds + ' seconds';
+    return formattedTime;
+  },
+
+  timestampToDays: function(timestamp){
+    return timestamp / (24 * 60 * 60) + " days";
+  },
+
+  timestampToDateTime: function(timestamp){
+    return moment.unix(timestamp).format("YYYY-MM-DD hh:mm");
   }
 
 /*  watchEvent: function() {

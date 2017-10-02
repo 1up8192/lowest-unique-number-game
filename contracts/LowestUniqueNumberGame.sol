@@ -38,10 +38,16 @@ contract LowestUniqueNumberGame {
         uint value;
     }
 
-    event prizeClaimed(uint indexed prize);
+    event prizeClaimed(uint indexed prize, address sender);
     event payback(uint indexed value);
     event finalRefund(uint indexed refund);
     event stashPayout(uint indexed payout);
+    event numberSubmitted(bytes32 hash, address sender);
+    event numberUncovered(uint number, address sender);
+    event prizeRecycled(uint netValue);
+    event prizePumped(uint value, address sender);
+    event newRoundStarted();
+
 
     function LowestUniqueNumberGame() {
         owner = msg.sender;
@@ -115,6 +121,7 @@ contract LowestUniqueNumberGame {
         taxes();
         if(ruleUpdateNeeded) updateRules();
         delete candidatesHeap;
+        newRoundStarted();
     }
 
     function submitSecretNumber(bytes32 hash) payable onlyActive{
@@ -127,6 +134,7 @@ contract LowestUniqueNumberGame {
         activeRound.payments[hash] = msg.value;
         activeRound.value += msg.value;
         activeRound.numberOfGuesses += 1;
+        numberSubmitted(hash, msg.sender);
     }
 
     function uncoverNumber(uint number, string password) onlyActive{
@@ -163,6 +171,7 @@ contract LowestUniqueNumberGame {
             }
             roundToUncover.numbersUncovered[number].push(msg.sender);
         }
+        numberUncovered(number, msg.sender);
     }
 
     function checkIfClaimable(uint roundID) constant returns (bool){
@@ -176,7 +185,7 @@ contract LowestUniqueNumberGame {
         require(!roundList[roundID].prizeClaimed);
         require(msg.sender == roundList[roundID].winner);
         msg.sender.transfer(roundList[roundID].value);
-        prizeClaimed(roundList[roundID].value);
+        prizeClaimed(roundList[roundID].value, msg.sender);
         roundList[roundID].prizeClaimed = true;
 
     }
@@ -186,13 +195,16 @@ contract LowestUniqueNumberGame {
             startNewRound();
         }
         roundList[SafeMath.safeSub(roundList.length, 1)].value += msg.value;
+        prizePumped(msg.value, msg.sender);
     }
 
     function recyclePrize(uint roundID) onlyActive {
         require(isPrizeExpired(roundID));
-        roundList[SafeMath.safeSub(roundList.length, 1)].value += roundList[roundID].value / 2;
-        stash += roundList[roundID].value / 2;
+        uint netRecycleValue = roundList[roundID].value / 100 * (100 - rules.expirationEdgePercent);
+        roundList[SafeMath.safeSub(roundList.length, 1)].value += netRecycleValue;
+        stash += roundList[roundID].value / 100 * rules.expirationEdgePercent;
         roundList[roundID].prizeClaimed = true;
+        prizeRecycled(netRecycleValue);
     }
 
     function noWinnerValueCarry() internal {

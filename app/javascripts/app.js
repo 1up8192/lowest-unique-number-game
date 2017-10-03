@@ -9,7 +9,7 @@ import { default as contract } from 'truffle-contract';
 import lung_artifacts from '../../build/contracts/LowestUniqueNumberGame.json';
 import th_artifacts from '../../build/contracts/TestHelpers.json';
 
-import tableHelper from './tableHelper.js';
+import * as tableHelper from './tableHelper.js';
 
 import * as moment from 'moment'
 
@@ -29,6 +29,8 @@ var account;
 var self;
 
 var testMode;
+
+var rules;
 
 window.App = {
   start: function() {
@@ -106,6 +108,23 @@ window.App = {
       console.log(result);
       self.setStatus("Transaction complete!");
       self.refreshUncoverRoundStatsDisplay();
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error; see log.");
+    });
+  },
+
+  claimPrize: function(){
+    var RoundNumber = document.getElementById("claimRoundNumberInput").value;
+    var instance;
+    return ContractAbstraction.deployed().then(function(_instance){
+      instance = _instance;
+      return instance.claimPrize(roundNumber - 1, {from: accounts[0], gas: 1000000});
+    }).then(function(result) {
+      console.log("prize claimed")
+      console.log(result);
+      self.setStatus("Transaction complete!");
+      self.refreshLastClosedRoundStatsDisplay();
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error; see log.");
@@ -200,6 +219,7 @@ window.App = {
       };
       console.log("queried rules");
       console.log(result);
+      rules = result;
       return result;
     }).catch(function(e) {
       console.log(e);
@@ -212,8 +232,6 @@ window.App = {
     var roundData
     return self.getRoundStats(roundId).then(function(_roundData){
       roundData = _roundData;
-      return self.getRules();
-    }).then(function(rules){
       var isPrizeExpired = self.isExpired(roundData.startTime, rules.prizeExpiration);
       document.getElementById("roundStartTime").innerHTML = self.timestampToDateTime(roundData.startTime);
       document.getElementById("roundNumberCount").innerHTML = roundData.numberOfGuesses;
@@ -254,8 +272,6 @@ window.App = {
       return self.getRoundStats(numberOfRounds - 1);
     }).then(function(_roundData){
       activeRoundData = _roundData;
-      return self.getRules();
-    }).then(function(rules){
       document.getElementById("activeRoundNumber").innerHTML = numberOfRounds;
       document.getElementById("activeRoundStartTime").innerHTML = self.timestampToDateTime(activeRoundData.startTime);
       document.getElementById("activeRoundRemainingTime").innerHTML = self.timestampToTime( (activeRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
@@ -273,8 +289,6 @@ window.App = {
       return self.getRoundStats(numberOfRounds - 2);
     }).then(function(_roundData){
       uncoverRoundData = _roundData;
-      return self.getRules();
-    }).then(function(rules){
       document.getElementById("uncoverRoundNumber").innerHTML = numberOfRounds - 1;
       document.getElementById("uncoverRoundStartTime").innerHTML = self.timestampToDateTime(uncoverRoundData.startTime);
       document.getElementById("uncoverRoundRemainingTime").innerHTML = self.timestampToTime( (uncoverRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
@@ -295,8 +309,6 @@ window.App = {
       return self.getRoundStats(numberOfRounds - 3);
     }).then(function(_roundData){
       lastClosedRoundData = _roundData;
-      return self.getRules();
-    }).then(function(rules){
       document.getElementById("lastClosedRoundNumber").innerHTML = numberOfRounds - 2;
       document.getElementById("lastClosedRoundStartTime").innerHTML = self.timestampToDateTime(lastClosedRoundData.startTime);
       document.getElementById("lastClosedRoundRemainingTime").innerHTML = self.timestampToTime( (lastClosedRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
@@ -393,21 +405,18 @@ window.App = {
   },
 
   calculateDecoy: function() {
-    return self.getRules().then(function(rules){
-      var numberPrice = rules.numberPrice;
-      document.getElementById("sendDecoyInput").value = numberPrice * Math.floor(Math.random() * 100);
-      self.calculatePrice();
-    });
+    var numberPrice = rules.numberPrice;
+    document.getElementById("sendDecoyInput").value = numberPrice * Math.floor(Math.random() * 100);
+    self.calculatePrice();
   },
 
   calculatePrice: function() {
-    if(document.getElementById("sendNumberInput").value && document.getElementById("sendDecoyInput").value)
-    return self.getRules().then(function(rules){
+    if(document.getElementById("sendNumberInput").value && document.getElementById("sendDecoyInput").value) {
       var numberPrice = parseFloat(rules.numberPrice);
       var number = parseFloat(document.getElementById("sendNumberInput").value);
       var decoy = parseFloat(document.getElementById("sendDecoyInput").value);
       document.getElementById("sendTransactionPrice").innerHTML = (number * numberPrice + decoy).toFixed(Math.ceil(Math.abs(self.getBaseLog(10, numberPrice)))) + " ETH";
-    });
+    }
   },
 
   getBaseLog: function(x, y) {
@@ -436,27 +445,51 @@ window.App = {
 
   timestampToDateTime: function(timestamp){
     return moment.unix(timestamp).format("YYYY-MM-DD hh:mm");
-  }
+  },
 
-/*  watchEvent: function() {
-    var changesTable = document.getElementById("changes")
-    addHeaderRow(changesTable, ["Old greeting:", "New Greeting:", "Changer Address:"])
-
+  watchEvents: function() {
+    var feedTable = document.getElementById("liveFeed");
     var helloWorld;
     LowestUniqueNumberGame.deployed().then(function(instance) {
       helloWorld = instance;
-      var eventGreetingChanged = helloWorld.greetingChanged();
+      var allEvents = helloWorld.allEvents();
 
       // watch for changes
-      eventGreetingChanged.watch(function(error, result){
+      allEvents.watch(function(error, result){
         if (!error){
+          var eventType = result.event;
+          if (eventType == "numberSubmitted"){
+            tableHelper.addDataRow(feedTable, ["Number Submitted", result.args.sender.substr(0, 9) + "...", "Hash: " + result.args.hash.substr(0, 9) + "..."]);
+          }
+
+          if (eventType == "prizeClaimed"){
+            tableHelper.addDataRow(feedTable, ["Prize Claimed", result.args.sender.substr(0, 9) + "...", "Prize: " + web3.fromWei(result.args.prize, 'ether') + " ETH"]);
+          }
+
+          if (eventType == "numberUncovered"){
+            tableHelper.addDataRow(feedTable, ["Number Uncovered", result.args.sender.substr(0, 9) + "...", "Number: " + result.args.number]);
+          }
+
+          if (eventType == "prizeRecycled"){
+            tableHelper.addDataRow(feedTable, ["Prize Recycled", "", "Value: " + web3.fromWei(result.args.netValue, 'ether') + " ETH"]);
+          }
+
+          if (eventType == "prizePumped"){
+            tableHelper.addDataRow(feedTable, ["Prize Pumped", result.args.sender.substr(0, 9), "Value: " + web3.fromWei(result.args.value, 'ether') + " ETH"]);
+          }
+
+          if (eventType == "newRoundStarted"){
+            tableHelper.addDataRow(feedTable, ["New Round Started", "", ""]);
+          }
+
+          console.log("event caught")
           console.log(result);
         } else {
           console.log(error);
         }
       });
     });
-  }*/
+  }
 
 };
 
@@ -474,6 +507,6 @@ window.addEventListener('load', function() {
 
   App.start();
 
-  //App.watchEvent();
+  App.watchEvents();
 
 });

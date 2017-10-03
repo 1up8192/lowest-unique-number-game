@@ -52,6 +52,26 @@
     <br>
     <hr>
   </div >
+  <div id="feed">
+    <h2>Live Feed</h2>
+    <table id="liveFeed" class="flat-table">
+      <tr>
+       <th>Event</th>
+       <th>Address</th>
+       <th>Data</th>
+     </tr>
+   </table>
+  </div>
+  <div id="claim">
+    <h2>Claim Prize</h2>
+    <br>
+    <label for="claimRoundNumberInput">Round Number: </label>
+    <input type="number" id="claimRoundNumberInput" min="1"></input>
+    <br>
+    <button id="submitClaim" onclick="App.claimPrize()">Send Transaction</button>
+    <br>
+    <hr>
+  </div >
   <div id="currentStats">
     <h2>Current Statistics</h2>
     <br>

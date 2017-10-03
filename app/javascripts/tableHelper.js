@@ -1,33 +1,37 @@
-function createDataCell(content){
-  var cell = document.createElement("td");
-  cell.textContent = content;
-  return cell;
-}
+var tableHelpers={
+  createDataCell: function(content){
+    var cell = document.createElement("td");
+    cell.textContent = content;
+    return cell;
+  },
 
-function createHeaderCell(content){
-  var cell = document.createElement("th");
-  cell.textContent = content;
-  return cell;
-}
+  createHeaderCell: function(content){
+    var cell = document.createElement("th");
+    cell.textContent = content;
+    return cell;
+  },
 
-function addDataRow(table, columnList){
-  var row = document.createElement("tr");
-  columnList.map(createDataCell).forEach((cell) => {
-    row.appendChild(cell);
-  })
-  table.appendChild(row);
-}
+  addDataRow: function(table, columnList){
+    var row = document.createElement("tr");
+    columnList.map(this.createDataCell).forEach((cell) => {
+      row.appendChild(cell);
+    })
+    table.appendChild(row);
+  },
 
-function addHeaderRow(table, columnHeaderList){
-  var row = document.createElement("tr");
-  columnHeaderList.map(createHeaderCell).forEach((cell) => {
-    row.appendChild(cell);
-  })
-  table.appendChild(row);
-}
+  addHeaderRow: function(table, columnHeaderList){
+    var row = document.createElement("tr");
+    columnHeaderList.map(this.createHeaderCell).forEach((cell) => {
+      row.appendChild(cell);
+    })
+    table.appendChild(row);
+  },
 
-function limitRows(table, maxRows){
-  if(table.rows.length > maxRows + 1){
-    table.deleteRow(1);
+  limitRows: function(table, maxRows){
+    if(table.rows.length > maxRows + 1){
+      table.deleteRow(1);
+    }
   }
-}
+};
+
+module.exports = tableHelpers;

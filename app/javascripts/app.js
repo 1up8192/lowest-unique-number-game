@@ -232,6 +232,8 @@ window.App = {
     var roundData
     return self.getRoundStats(roundId).then(function(_roundData){
       roundData = _roundData;
+      return self.getAllNumbers(roundId)
+    }).then(function(allNumbers) {
       var isPrizeExpired = self.isExpired(roundData.startTime, rules.prizeExpiration);
       document.getElementById("roundStartTime").innerHTML = self.timestampToDateTime(roundData.startTime);
       document.getElementById("roundNumberCount").innerHTML = roundData.numberOfGuesses;
@@ -239,7 +241,7 @@ window.App = {
       document.getElementById("roundValue").innerHTML = roundData.value + " ETH";
       document.getElementById("roundWinnerNumber").innerHTML = roundData.smallestNumber;
       document.getElementById("roundWinner").innerHTML = roundData.winner;
-      document.getElementById("roundAllNumbers").innerHTML = self.getAllNumbers(roundId);
+      document.getElementById("roundAllNumbers").innerHTML = allNumbers;
       document.getElementById("roundPrizeClaimed").innerHTML = roundData.prizeClaimed;
       document.getElementById("roundPrizeExpired").innerHTML = isPrizeExpired;
     });
@@ -309,6 +311,8 @@ window.App = {
       return self.getRoundStats(numberOfRounds - 3);
     }).then(function(_roundData){
       lastClosedRoundData = _roundData;
+      return self.getAllNumbers(numberOfRounds - 3)
+    }).then(function(allNumbers) {
       document.getElementById("lastClosedRoundNumber").innerHTML = numberOfRounds - 2;
       document.getElementById("lastClosedRoundStartTime").innerHTML = self.timestampToDateTime(lastClosedRoundData.startTime);
       document.getElementById("lastClosedRoundRemainingTime").innerHTML = self.timestampToTime( (lastClosedRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
@@ -318,6 +322,7 @@ window.App = {
       document.getElementById("lastClosedRoundValue").innerHTML = lastClosedRoundData.value + " ETH";
       document.getElementById("lastClosedRoundWinnerNumber").innerHTML = lastClosedRoundData.smallestNumber;
       document.getElementById("lastClosedRoundWinner").innerHTML = lastClosedRoundData.winner;
+      document.getElementById("lastClosedRoundAllNumbers").innerHTML = allNumbers;
       document.getElementById("lastClosedRoundPrizeClaimed").innerHTML = lastClosedRoundData.prizeClaimed;
     });
   },
@@ -365,21 +370,17 @@ window.App = {
     var results = [];
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.getNumberOfUncovers.call(roundID);
+      return instance.getAllNumbers.call(roundID);
     }).then(function(result) {
-      var lenght = result;
-      var index = -1;
-      return asyncWhile(function() {
-        // bump index before every loop
-        index += 1;
-
-        // synchronously checks if there are more
-        return index < lenght;
-      }, function() {
-        return instance.getUncoveredNumber.call(roundID, index).then(function(result) {
-          return results.push(result);
-        });
-      });
+      var allNumbers = result.split(",");
+      allNumbers.sort();
+      console.log("get all numbers")
+      console.log(allNumbers);
+      self.setStatus("Transaction complete!");
+      return allNumbers;
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error; see log.");
     });
   },
 
@@ -481,7 +482,7 @@ window.App = {
           if (eventType == "newRoundStarted"){
             tableHelper.addDataRow(feedTable, ["New Round Started", "", ""]);
           }
-
+          tableHelper.limitRows(feedTable, 10);
           console.log("event caught")
           console.log(result);
         } else {

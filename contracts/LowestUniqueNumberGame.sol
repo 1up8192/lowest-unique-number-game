@@ -356,6 +356,67 @@ contract LowestUniqueNumberGame {
         return roundList[roundID].numbersUncoveredUnsorted[i];
     }
 
+    function getAllNumbers(uint roundID) constant returns (string){
+        uint length = roundList[roundID].numbersUncoveredUnsorted.length;
+        string memory result = "";
+        if (length > 0){
+            result = uintToString(roundList[roundID].numbersUncoveredUnsorted[0]);
+            for (uint i = 1; i < length; i+=1){
+                result = strConcat(result, ",");
+                result = strConcat(result, uintToString(roundList[roundID].numbersUncoveredUnsorted[i]));
+            }
+        }
+        return result;
+    }
+
+    function uintToString(uint n) constant returns (string){
+        return bytes32ToString(uintToBytes(n));
+    }
+
+    function uintToBytes(uint v) constant returns (bytes32 ret) {
+        if (v == 0) {
+            ret = '0';
+        }
+        else {
+            while (v > 0) {
+                ret = bytes32(uint(ret) / (2 ** 8));
+                ret |= bytes32(((v % 10) + 48) * 2 ** (8 * 31));
+                v /= 10;
+            }
+        }
+        return ret;
+    }
+
+    function bytes32ToString(bytes32 x) constant returns (string) {
+        bytes memory bytesString = new bytes(32);
+        uint charCount = 0;
+        for (uint j = 0; j < 32; j++) {
+            byte char = byte(bytes32(uint(x) * 2 ** (8 * j)));
+            if (char != 0) {
+                bytesString[charCount] = char;
+                charCount++;
+            }
+        }
+        bytes memory bytesStringTrimmed = new bytes(charCount);
+        for (j = 0; j < charCount; j++) {
+            bytesStringTrimmed[j] = bytesString[j];
+        }
+        return string(bytesStringTrimmed);
+    }
+
+    function strConcat(string a, string b) constant returns (string){
+        bytes memory bytesA = bytes(a);
+        bytes memory bytesB = bytes(b);
+        string memory result = new string(bytesA.length + bytesB.length);
+        bytes memory bytesResult = bytes(result);
+        uint k = 0;
+        for (uint i = 0; i < bytesA.length; i++) bytesResult[k++] = bytesA[i];
+        for (i = 0; i < bytesB.length; i++) bytesResult[k++] = bytesB[i];
+        return string(result);
+    }
+
+
+
     function getPrizeClaimed(uint roundID) constant returns (bool){
         return roundList[roundID].prizeClaimed;
     }

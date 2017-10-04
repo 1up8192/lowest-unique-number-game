@@ -55,6 +55,8 @@ window.App = {
 
       accounts = accs;
       account = accounts[0];
+
+
       console.log("accounts: ");
       console.log(accounts);
 
@@ -78,13 +80,13 @@ window.App = {
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.hashNumber.call(number, password, {from: accounts[0]});
+      return instance.hashNumber.call(number, password, {from: account});
     }).then(function(_hash){
       hash = _hash;
-      return instance.getNumberPrice.call();
+      return instance.getNumberPrice.call({from: account});
     }).then(function(_numberPrice){
       numberPrice = _numberPrice.toNumber();
-      return instance.submitSecretNumber(hash, {from: accounts[0], value: numberPrice * number + decoy, gas: 500000});
+      return instance.submitSecretNumber(hash, {from: account, value: numberPrice * number + decoy, gas: 500000});
     }).then(function(result) {
       console.log("sercet number submitted");
       console.log(result);
@@ -102,7 +104,7 @@ window.App = {
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.uncoverNumber(number, password, {from: accounts[0], gas: 1000000});
+      return instance.uncoverNumber(number, password, {from: account, gas: 1000000});
     }).then(function(result) {
       console.log("number uncovered")
       console.log(result);
@@ -119,7 +121,7 @@ window.App = {
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.claimPrize(roundNumber - 1, {from: accounts[0], gas: 1000000});
+      return instance.claimPrize(roundNumber - 1, {from: account, gas: 1000000});
     }).then(function(result) {
       console.log("prize claimed")
       console.log(result);
@@ -142,25 +144,25 @@ window.App = {
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.getStartTime.call(roundId);
+      return instance.getStartTime.call(roundId, {from: account});
     }).then(function(_startTime) {
       startTime = _startTime.toNumber();
-      return instance.getWinner.call(roundId);
+      return instance.getWinner.call(roundId, {from: account});
     }).then(function(_winner) {
       winner = _winner.toString();
-      return instance.getSmallestNumber.call(roundId);
+      return instance.getSmallestNumber.call(roundId, {from: account});
     }).then(function(_smallestNumber) {
       smallestNumber = _smallestNumber.toNumber();
-      return instance.getNumberOfGuesses.call(roundId);
+      return instance.getNumberOfGuesses.call(roundId, {from: account});
     }).then(function(_numberOfGuesses) {
       numberOfGuesses = _numberOfGuesses.toNumber();
-      return instance.getNumberOfUncovers.call(roundId);
+      return instance.getNumberOfUncovers.call(roundId, {from: account});
     }).then(function(_numberOfUncovers) {
       numberOfUncovers = _numberOfUncovers.toNumber();
-      return instance.getPrizeClaimed.call(roundId);
+      return instance.getPrizeClaimed.call(roundId, {from: account});
     }).then(function(_prizeClaimed) {
       prizeClaimed = _prizeClaimed;
-      return instance.getRoundValue.call(roundId);
+      return instance.getRoundValue.call(roundId, {from: account});
     }).then(function(_value) {
       value = web3.fromWei(_value, "ether").toNumber();
       var result = {
@@ -191,22 +193,22 @@ window.App = {
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.getPrizeCarryPercent.call();
+      return instance.getPrizeCarryPercent.call({from: account});
     }).then(function(_prizeCarryPercent) {
       prizeCarryPercent = _prizeCarryPercent.toNumber();
-      return instance.getEdgePercent.call();
+      return instance.getEdgePercent.call({from: account});
     }).then(function(_edgePercent) {
       edgePercent = _edgePercent.toNumber();
-      return instance.getPeriodLength.call();
+      return instance.getPeriodLength.call({from: account});
     }).then(function(_periodLength) {
       periodLength = _periodLength.toNumber();
-      return instance.getNumberPrice.call();
+      return instance.getNumberPrice.call({from: account});
     }).then(function(_numberPrice) {
       numberPrice = web3.fromWei(_numberPrice, "ether").toNumber();
-      return instance.getPrizeExpiration.call();
+      return instance.getPrizeExpiration.call({from: account});
     }).then(function(_prizeExpiration) {
       prizeExpiration = _prizeExpiration.toNumber();
-      return instance.getExpirationEdgePercent.call();
+      return instance.getExpirationEdgePercent.call({from: account});
     }).then(function(_expirationEdgePercent) {
       expirationEdgePercent = _expirationEdgePercent.toNumber();
       var result = {
@@ -331,7 +333,7 @@ window.App = {
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.getNumberOfRounds.call();
+      return instance.getNumberOfRounds.call({from: account});
     }).then(function(result) {
       console.log("queried number of rounds");
       console.log(result);
@@ -354,7 +356,7 @@ window.App = {
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.skipRound({from: accounts[0], gas: 200000});
+      return instance.skipRound({from: account, gas: 200000});
     }).then(function(result) {
       console.log("round skipped")
       console.log(result);
@@ -370,7 +372,7 @@ window.App = {
     var results = [];
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
-      return instance.getAllNumbers.call(roundID);
+      return instance.getAllNumbers.call(roundID, {from: account});
     }).then(function(result) {
       var allNumbers = result.split(",");
       allNumbers.sort();

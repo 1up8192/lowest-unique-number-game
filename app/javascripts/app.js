@@ -115,7 +115,7 @@ window.App = {
   },
 
   claimPrize: function(){
-    var RoundNumber = document.getElementById("claimRoundNumberInput").value;
+    var roundNumber = document.getElementById("claimRoundNumberInput").value;
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
@@ -450,7 +450,7 @@ window.App = {
   watchEvents: function() {
     var feedTable = document.getElementById("liveFeed");
     var helloWorld;
-    LowestUniqueNumberGame.deployed().then(function(instance) {
+    ContractAbstraction.deployed().then(function(instance) {
       helloWorld = instance;
       var allEvents = helloWorld.allEvents();
 

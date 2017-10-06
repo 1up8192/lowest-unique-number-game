@@ -32,6 +32,172 @@ var testMode;
 
 var rules;
 
+function getRoundStats(roundId) {
+  var startTime;
+  var winner;
+  var smallestNumber;
+  var numberOfGuesses;
+  var numberOfUncovers;
+  var prizeClaimed;
+  var value;
+  var instance;
+  return ContractAbstraction.deployed().then(function(_instance){
+    instance = _instance;
+    return instance.getStartTime.call(roundId, {from: account});
+  }).then(function(_startTime) {
+    startTime = _startTime.toNumber();
+    return instance.getWinner.call(roundId, {from: account});
+  }).then(function(_winner) {
+    winner = _winner.toString();
+    return instance.getSmallestNumber.call(roundId, {from: account});
+  }).then(function(_smallestNumber) {
+    smallestNumber = _smallestNumber.toNumber();
+    return instance.getNumberOfGuesses.call(roundId, {from: account});
+  }).then(function(_numberOfGuesses) {
+    numberOfGuesses = _numberOfGuesses.toNumber();
+    return instance.getNumberOfUncovers.call(roundId, {from: account});
+  }).then(function(_numberOfUncovers) {
+    numberOfUncovers = _numberOfUncovers.toNumber();
+    return instance.getPrizeClaimed.call(roundId, {from: account});
+  }).then(function(_prizeClaimed) {
+    prizeClaimed = _prizeClaimed;
+    return instance.getRoundValue.call(roundId, {from: account});
+  }).then(function(_value) {
+    value = web3.fromWei(_value, "ether").toNumber();
+    var result = {
+      startTime: startTime,
+      winner: winner,
+      smallestNumber: smallestNumber,
+      numberOfGuesses: numberOfGuesses,
+      numberOfUncovers: numberOfUncovers,
+      prizeClaimed: prizeClaimed,
+      value: value
+    };
+    console.log("queried round stats");
+    console.log(result);
+    return result;
+  }).catch(function(e) {
+    console.log(e);
+    self.setStatus("Error; see log.");
+  });
+}
+
+function getRules(){
+  var prizeCarryPercent;
+  var edgePercent;
+  var periodLength;
+  var numberPrice;
+  var prizeExpiration;
+  var expirationEdgePercent;
+  var instance;
+  return ContractAbstraction.deployed().then(function(_instance){
+    instance = _instance;
+    return instance.getPrizeCarryPercent.call({from: account});
+  }).then(function(_prizeCarryPercent) {
+    prizeCarryPercent = _prizeCarryPercent.toNumber();
+    return instance.getEdgePercent.call({from: account});
+  }).then(function(_edgePercent) {
+    edgePercent = _edgePercent.toNumber();
+    return instance.getPeriodLength.call({from: account});
+  }).then(function(_periodLength) {
+    periodLength = _periodLength.toNumber();
+    return instance.getNumberPrice.call({from: account});
+  }).then(function(_numberPrice) {
+    numberPrice = web3.fromWei(_numberPrice, "ether").toNumber();
+    return instance.getPrizeExpiration.call({from: account});
+  }).then(function(_prizeExpiration) {
+    prizeExpiration = _prizeExpiration.toNumber();
+    return instance.getExpirationEdgePercent.call({from: account});
+  }).then(function(_expirationEdgePercent) {
+    expirationEdgePercent = _expirationEdgePercent.toNumber();
+    var result = {
+      prizeCarryPercent: prizeCarryPercent,
+      edgePercent: edgePercent,
+      periodLength: periodLength,
+      numberPrice: numberPrice,
+      prizeExpiration: prizeExpiration,
+      expirationEdgePercent: expirationEdgePercent
+    };
+    console.log("queried rules");
+    console.log(result);
+    rules = result;
+    return result;
+  }).catch(function(e) {
+    console.log(e);
+    self.setStatus("Error; see log.");
+  });
+}
+
+function getNumberOfRounds(){
+  var instance;
+  return ContractAbstraction.deployed().then(function(_instance){
+    instance = _instance;
+    return instance.getNumberOfRounds.call({from: account});
+  }).then(function(result) {
+    console.log("queried number of rounds");
+    console.log(result);
+    return result;
+  }).catch(function(e) {
+    console.log(e);
+    self.setStatus("Error; see log.");
+  });
+}
+
+function isExpired(startTime, expiryTime){
+  if(startTime + expiryTime < Math.floor(Date.now() / 1000)){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function getAllNumbers(roundID) {
+  var instance;
+  var results = [];
+  return ContractAbstraction.deployed().then(function(_instance){
+    instance = _instance;
+    return instance.getAllNumbers.call(roundID, {from: account});
+  }).then(function(result) {
+    var allNumbers = result.split(",");
+    allNumbers.sort();
+    console.log("get all numbers")
+    console.log(allNumbers);
+    self.setStatus("Transaction complete!");
+    return allNumbers;
+  }).catch(function(e) {
+    console.log(e);
+    self.setStatus("Error; see log.");
+  });
+}
+
+function getBaseLog(x, y) {
+  return Math.log(y) / Math.log(x);
+}
+
+function timestampToTime(timestamp){
+  var hours = Math.floor(timestamp/3600);
+  var remainingTime = timestamp % 3600;
+
+  var minutes = Math.floor(remainingTime / 60);
+  remainingTime = remainingTime % 60;
+
+  var seconds = remainingTime;
+
+  var formattedTime = '';
+  if (parseInt(hours) > 0) formattedTime += hours + ' hours';
+  if (parseInt(minutes) > 0) formattedTime += ', ' + minutes + ' minutes';
+  if (parseInt(seconds) > 0) formattedTime += ', ' + seconds + ' seconds';
+  return formattedTime;
+}
+
+function timestampToDays(timestamp){
+  return timestamp / (24 * 60 * 60) + " days";
+}
+
+function timestampToDateTime(timestamp){
+  return moment.unix(timestamp).format("YYYY-MM-DD hh:mm");
+}
+
 window.App = {
   start: function() {
     self = this;
@@ -133,111 +299,15 @@ window.App = {
     });
   },
 
-  getRoundStats: function(roundId) {
-    var startTime;
-    var winner;
-    var smallestNumber;
-    var numberOfGuesses;
-    var numberOfUncovers;
-    var prizeClaimed;
-    var value;
-    var instance;
-    return ContractAbstraction.deployed().then(function(_instance){
-      instance = _instance;
-      return instance.getStartTime.call(roundId, {from: account});
-    }).then(function(_startTime) {
-      startTime = _startTime.toNumber();
-      return instance.getWinner.call(roundId, {from: account});
-    }).then(function(_winner) {
-      winner = _winner.toString();
-      return instance.getSmallestNumber.call(roundId, {from: account});
-    }).then(function(_smallestNumber) {
-      smallestNumber = _smallestNumber.toNumber();
-      return instance.getNumberOfGuesses.call(roundId, {from: account});
-    }).then(function(_numberOfGuesses) {
-      numberOfGuesses = _numberOfGuesses.toNumber();
-      return instance.getNumberOfUncovers.call(roundId, {from: account});
-    }).then(function(_numberOfUncovers) {
-      numberOfUncovers = _numberOfUncovers.toNumber();
-      return instance.getPrizeClaimed.call(roundId, {from: account});
-    }).then(function(_prizeClaimed) {
-      prizeClaimed = _prizeClaimed;
-      return instance.getRoundValue.call(roundId, {from: account});
-    }).then(function(_value) {
-      value = web3.fromWei(_value, "ether").toNumber();
-      var result = {
-        startTime: startTime,
-        winner: winner,
-        smallestNumber: smallestNumber,
-        numberOfGuesses: numberOfGuesses,
-        numberOfUncovers: numberOfUncovers,
-        prizeClaimed: prizeClaimed,
-        value: value
-      };
-      console.log("queried round stats");
-      console.log(result);
-      return result;
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error; see log.");
-    });
-  },
-
-  getRules: function(){
-    var prizeCarryPercent;
-    var edgePercent;
-    var periodLength;
-    var numberPrice;
-    var prizeExpiration;
-    var expirationEdgePercent;
-    var instance;
-    return ContractAbstraction.deployed().then(function(_instance){
-      instance = _instance;
-      return instance.getPrizeCarryPercent.call({from: account});
-    }).then(function(_prizeCarryPercent) {
-      prizeCarryPercent = _prizeCarryPercent.toNumber();
-      return instance.getEdgePercent.call({from: account});
-    }).then(function(_edgePercent) {
-      edgePercent = _edgePercent.toNumber();
-      return instance.getPeriodLength.call({from: account});
-    }).then(function(_periodLength) {
-      periodLength = _periodLength.toNumber();
-      return instance.getNumberPrice.call({from: account});
-    }).then(function(_numberPrice) {
-      numberPrice = web3.fromWei(_numberPrice, "ether").toNumber();
-      return instance.getPrizeExpiration.call({from: account});
-    }).then(function(_prizeExpiration) {
-      prizeExpiration = _prizeExpiration.toNumber();
-      return instance.getExpirationEdgePercent.call({from: account});
-    }).then(function(_expirationEdgePercent) {
-      expirationEdgePercent = _expirationEdgePercent.toNumber();
-      var result = {
-        prizeCarryPercent: prizeCarryPercent,
-        edgePercent: edgePercent,
-        periodLength: periodLength,
-        numberPrice: numberPrice,
-        prizeExpiration: prizeExpiration,
-        expirationEdgePercent: expirationEdgePercent
-      };
-      console.log("queried rules");
-      console.log(result);
-      rules = result;
-      return result;
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error; see log.");
-    });
-  },
-
   getPastRoundStats: function() {
     var roundId = document.getElementById("roundNumberInput").value - 1;
     var roundData
-    return self.getRoundStats(roundId).then(function(_roundData){
+    return getRoundStats(roundId).then(function(_roundData){
       roundData = _roundData;
-      return self.getAllNumbers(roundId)
+      return getAllNumbers(roundId)
     }).then(function(allNumbers) {
-      var isPrizeExpired = self.isExpired(roundData.startTime, rules.prizeExpiration);
-      document.getElementById("roundStartTime").innerHTML = self.timestampToDateTime(roundData.startTime);
+      var isPrizeExpired = isExpired(roundData.startTime, rules.prizeExpiration);
+      document.getElementById("roundStartTime").innerHTML = timestampToDateTime(roundData.startTime);
       document.getElementById("roundNumberCount").innerHTML = roundData.numberOfGuesses;
       document.getElementById("roundUncoverCount").innerHTML = roundData.numberOfUncovers;
       document.getElementById("roundValue").innerHTML = roundData.value + " ETH";
@@ -258,12 +328,12 @@ window.App = {
   },
 
   refreshRulesDisplay: function(){
-    return self.getRules().then(function(rules){
+    return getRules().then(function(rules){
       document.getElementById("prizeCarryPercent").innerHTML = rules.prizeCarryPercent + "%";
       document.getElementById("edgePercent").innerHTML = rules.edgePercent + "%";
-      document.getElementById("periodLength").innerHTML = self.timestampToTime(rules.periodLength);
+      document.getElementById("periodLength").innerHTML = timestampToTime(rules.periodLength);
       document.getElementById("numberPrice").innerHTML = rules.numberPrice + " ETH";
-      document.getElementById("prizeExpiration").innerHTML = self.timestampToDays(rules.prizeExpiration);
+      document.getElementById("prizeExpiration").innerHTML = timestampToDays(rules.prizeExpiration);
       document.getElementById("expirationEdgePercent").innerHTML = rules.expirationEdgePercent + "%";
     });
   },
@@ -271,15 +341,15 @@ window.App = {
   refreshActiveRoundStatsDisplay: function(){
     var numberOfRounds;
     var activeRoundData;
-    return self.getNumberOfRounds().then(function(_numberOfRounds){
+    return getNumberOfRounds().then(function(_numberOfRounds){
       numberOfRounds = _numberOfRounds;
-      return self.getRoundStats(numberOfRounds - 1);
+      return getRoundStats(numberOfRounds - 1);
     }).then(function(_roundData){
       activeRoundData = _roundData;
       document.getElementById("activeRoundNumber").innerHTML = numberOfRounds;
-      document.getElementById("activeRoundStartTime").innerHTML = self.timestampToDateTime(activeRoundData.startTime);
-      document.getElementById("activeRoundRemainingTime").innerHTML = self.timestampToTime( (activeRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
-      document.getElementById("activeRoundEndTime").innerHTML = self.timestampToDateTime(activeRoundData.startTime + rules.periodLength);
+      document.getElementById("activeRoundStartTime").innerHTML = timestampToDateTime(activeRoundData.startTime);
+      document.getElementById("activeRoundRemainingTime").innerHTML = timestampToTime( (activeRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
+      document.getElementById("activeRoundEndTime").innerHTML = timestampToDateTime(activeRoundData.startTime + rules.periodLength);
       document.getElementById("activeRoundNumberCount").innerHTML = activeRoundData.numberOfGuesses;
       document.getElementById("activeRoundValue").innerHTML = activeRoundData.value + " ETH";
     });
@@ -288,15 +358,15 @@ window.App = {
   refreshUncoverRoundStatsDisplay: function(){
     var numberOfRounds;
     var uncoverRoundData;
-    return self.getNumberOfRounds().then(function(_numberOfRounds){
+    return getNumberOfRounds().then(function(_numberOfRounds){
       numberOfRounds = _numberOfRounds;
-      return self.getRoundStats(numberOfRounds - 2);
+      return getRoundStats(numberOfRounds - 2);
     }).then(function(_roundData){
       uncoverRoundData = _roundData;
       document.getElementById("uncoverRoundNumber").innerHTML = numberOfRounds - 1;
-      document.getElementById("uncoverRoundStartTime").innerHTML = self.timestampToDateTime(uncoverRoundData.startTime);
-      document.getElementById("uncoverRoundRemainingTime").innerHTML = self.timestampToTime( (uncoverRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
-      document.getElementById("uncoverRoundEndTime").innerHTML = self.timestampToDateTime(uncoverRoundData.startTime + rules.periodLength);
+      document.getElementById("uncoverRoundStartTime").innerHTML = timestampToDateTime(uncoverRoundData.startTime);
+      document.getElementById("uncoverRoundRemainingTime").innerHTML = timestampToTime( (uncoverRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
+      document.getElementById("uncoverRoundEndTime").innerHTML = timestampToDateTime(uncoverRoundData.startTime + rules.periodLength);
       document.getElementById("uncoverRoundNumberCount").innerHTML = uncoverRoundData.numberOfGuesses;
       document.getElementById("uncoverRoundUncoverCount").innerHTML = uncoverRoundData.numberOfUncovers;
       document.getElementById("uncoverRoundValue").innerHTML = uncoverRoundData.value + " ETH";
@@ -308,17 +378,17 @@ window.App = {
   refreshLastClosedRoundStatsDisplay: function(){
     var numberOfRounds;
     var lastClosedRoundData;
-    return self.getNumberOfRounds().then(function(_numberOfRounds){
+    return getNumberOfRounds().then(function(_numberOfRounds){
       numberOfRounds = _numberOfRounds;
-      return self.getRoundStats(numberOfRounds - 3);
+      return getRoundStats(numberOfRounds - 3);
     }).then(function(_roundData){
       lastClosedRoundData = _roundData;
-      return self.getAllNumbers(numberOfRounds - 3)
+      return getAllNumbers(numberOfRounds - 3)
     }).then(function(allNumbers) {
       document.getElementById("lastClosedRoundNumber").innerHTML = numberOfRounds - 2;
-      document.getElementById("lastClosedRoundStartTime").innerHTML = self.timestampToDateTime(lastClosedRoundData.startTime);
-      document.getElementById("lastClosedRoundRemainingTime").innerHTML = self.timestampToTime( (lastClosedRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
-      document.getElementById("lastClosedRoundEndTime").innerHTML = self.timestampToDateTime( lastClosedRoundData.startTime + rules.periodLength);
+      document.getElementById("lastClosedRoundStartTime").innerHTML = timestampToDateTime(lastClosedRoundData.startTime);
+      document.getElementById("lastClosedRoundRemainingTime").innerHTML = timestampToTime( (lastClosedRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
+      document.getElementById("lastClosedRoundEndTime").innerHTML = timestampToDateTime( lastClosedRoundData.startTime + rules.periodLength);
       document.getElementById("lastClosedRoundNumberCount").innerHTML = lastClosedRoundData.numberOfGuesses;
       document.getElementById("lastClosedRoundUncoverCount").innerHTML = lastClosedRoundData.numberOfUncovers;
       document.getElementById("lastClosedRoundValue").innerHTML = lastClosedRoundData.value + " ETH";
@@ -327,29 +397,6 @@ window.App = {
       document.getElementById("lastClosedRoundAllNumbers").innerHTML = allNumbers;
       document.getElementById("lastClosedRoundPrizeClaimed").innerHTML = lastClosedRoundData.prizeClaimed;
     });
-  },
-
-  getNumberOfRounds: function(){
-    var instance;
-    return ContractAbstraction.deployed().then(function(_instance){
-      instance = _instance;
-      return instance.getNumberOfRounds.call({from: account});
-    }).then(function(result) {
-      console.log("queried number of rounds");
-      console.log(result);
-      return result;
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error; see log.");
-    });
-  },
-
-  isExpired: function(startTime, expiryTime){
-    if(startTime + expiryTime < Math.floor(Date.now() / 1000)){
-      return true;
-    } else {
-      return false;
-    }
   },
 
   skipRound: function() {
@@ -361,25 +408,6 @@ window.App = {
       console.log("round skipped")
       console.log(result);
       self.setStatus("Transaction complete!");
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error; see log.");
-    });
-  },
-
-  getAllNumbers: function(roundID) {
-    var instance;
-    var results = [];
-    return ContractAbstraction.deployed().then(function(_instance){
-      instance = _instance;
-      return instance.getAllNumbers.call(roundID, {from: account});
-    }).then(function(result) {
-      var allNumbers = result.split(",");
-      allNumbers.sort();
-      console.log("get all numbers")
-      console.log(allNumbers);
-      self.setStatus("Transaction complete!");
-      return allNumbers;
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error; see log.");
@@ -418,36 +446,8 @@ window.App = {
       var numberPrice = parseFloat(rules.numberPrice);
       var number = parseFloat(document.getElementById("sendNumberInput").value);
       var decoy = parseFloat(document.getElementById("sendDecoyInput").value);
-      document.getElementById("sendTransactionPrice").innerHTML = (number * numberPrice + decoy).toFixed(Math.ceil(Math.abs(self.getBaseLog(10, numberPrice)))) + " ETH";
+      document.getElementById("sendTransactionPrice").innerHTML = (number * numberPrice + decoy).toFixed(Math.ceil(Math.abs(getBaseLog(10, numberPrice)))) + " ETH";
     }
-  },
-
-  getBaseLog: function(x, y) {
-    return Math.log(y) / Math.log(x);
-  },
-
-  timestampToTime: function(timestamp){
-    var hours = Math.floor(timestamp/3600);
-    var remainingTime = timestamp % 3600;
-
-    var minutes = Math.floor(remainingTime / 60);
-    remainingTime = remainingTime % 60;
-
-    var seconds = remainingTime;
-
-    var formattedTime = '';
-    if (parseInt(hours) > 0) formattedTime += hours + ' hours';
-    if (parseInt(minutes) > 0) formattedTime += ', ' + minutes + ' minutes';
-    if (parseInt(seconds) > 0) formattedTime += ', ' + seconds + ' seconds';
-    return formattedTime;
-  },
-
-  timestampToDays: function(timestamp){
-    return timestamp / (24 * 60 * 60) + " days";
-  },
-
-  timestampToDateTime: function(timestamp){
-    return moment.unix(timestamp).format("YYYY-MM-DD hh:mm");
   },
 
   watchEvents: function() {

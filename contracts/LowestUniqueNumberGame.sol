@@ -200,6 +200,7 @@ contract LowestUniqueNumberGame {
 
     function recyclePrize(uint roundID) onlyActive {
         require(isPrizeExpired(roundID));
+        require(!roundList[roundID].prizeClaimed);
         uint netRecycleValue = roundList[roundID].value / 100 * (100 - rules.expirationEdgePercent);
         roundList[SafeMath.safeSub(roundList.length, 1)].value += netRecycleValue;
         stash += roundList[roundID].value / 100 * rules.expirationEdgePercent;

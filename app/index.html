@@ -19,6 +19,37 @@
     <br>
   </div >
   <hr>
+  <div id="gameDesc">
+    <p>
+      <strong>Win by just simply guessing the smallest nobody thought of!</strong>
+    </p>
+    <h3>The game</h3>
+    <p>
+      The point of this game is to guess the lowest unique number of a round.
+      For example if the numbers in the round are: 1, 1, 3, 4, 6:
+      <ul>
+       <li>First we erase all the numbers which are present more than once</li>
+       <li>Now we get 3, 4, 6</li>
+       <li>The winner will be the smallest of the remaining numbers, so 3</li>
+      </ul>
+      Every player has to pay a small amount of ethers, when submitting their number,
+      this amount depends on the number, the bigger it is, the more you have to pay.
+      The most of the collective ether payed in a round will be the prize for the winner of the round.
+    </p>
+    <h3>Hiding the numbers</h3>
+    <p>
+      The Ethereum blockchain and therefore the the data and the transactions of an application built on it are readable by anyone.
+      But in this game we need to hide the numbers guessed, so we had to employ a little trick:
+      Encrypting the numbers with a passwod given by the player. Thats why we need a separate "send number" and "uncover number" phase in the game.
+    </p>
+    <h3>How to play</h3>
+    <p>
+      The numbers of a round are first sumbitted with password encryption.
+      After the given round ends (one round is one day by default) it's uncover phase starts which lasts for the same time.
+      During the uncover round players have to uncover their numbers with the password they have given.
+      At the end of the uncover phase the winner is determined, and they can claim their prize.
+    </p>
+  </div>
   <div id="send">
     <h2>Send Number</h2>
     <br>
@@ -57,7 +88,7 @@
     <table id="liveFeed" class="flat-table">
       <tr>
        <th>Event</th>
-       <th>Address</th>
+       <th>Sender Address</th>
        <th>Data</th>
      </tr>
    </table>

@@ -21,7 +21,7 @@
   <hr>
   <div id="gameDesc">
     <p>
-      <strong>Win by just simply guessing the smallest nobody thought of!</strong>
+      <strong>Win ether by simply guessing the smallest number nobody else thought of!</strong>
     </p>
     <h3>The game</h3>
     <p>
@@ -41,6 +41,7 @@
       The Ethereum blockchain and therefore the the data and the transactions of an application built on it are readable by anyone.
       But in this game we need to hide the numbers guessed, so we had to employ a little trick:
       Encrypting the numbers with a passwod given by the player. Thats why we need a separate "send number" and "uncover number" phase in the game.
+      When sending the encrypted number we also need to add a tiny decoy ether value to hide the actual transaction value which could be used to deduce the number.
     </p>
     <h3>How to play</h3>
     <p>
@@ -56,10 +57,10 @@
     <label for="sendNumberInput">Number: </label>
     <input type="number" id="sendNumberInput" min="1" oninput="App.calculateDecoy();App.calculatePrice()"></input>
     <br>
-    <label for="sendPasswordInput">Password: </label>
+    <label for="sendPasswordInput"><abbr title="WARNING: Always use a password! Never reuse a password or itarate it over the rounds (like: 'password1', 'password2' ...)">Password: </abbr></label>
     <input type="text" id="sendPasswordInput" ></input>
     <br>
-    <label for="sendDecoyInput">Decoy (ETH): </label>
+    <label for="sendDecoyInput"><abbr title="Decoy value to hide your transaction value">Decoy (ETH): </abbr></label>
     <input type="number" id="sendDecoyInput" step="0.001" disabled ></input>
     <button id="recalculateDecoy" onclick="App.calculateDecoy()" >Randomize again</button>
     <br>

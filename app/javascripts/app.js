@@ -63,7 +63,7 @@ function getRoundStats(roundId) {
     prizeClaimed = _prizeClaimed;
     return instance.getRoundValue.call(roundId, {from: account});
   }).then(function(_value) {
-    value = web3.fromWei(_value, "ether").toNumber();
+    _value = web3.fromWei(_value, "ether").toNumber();
     var result = {
       startTime: startTime,
       winner: winner,
@@ -233,14 +233,13 @@ window.App = {
   },
 
   setStatus: function(message) {
-    var status = document.getElementById("status");
-    status.innerHTML = message;
+    $("#status").html(message);
   },
 
   hashAndSubmitGuess: function() {
-    var number = document.getElementById("sendNumberInput").value;
-    var password = document.getElementById("sendPasswordInput").value;
-    var decoy = parseInt(web3.toWei(document.getElementById("sendDecoyInput").value, "ether"));
+    var number = $("#sendNumberInput").val();
+    var password = $("#sendPasswordInput").val();
+    var decoy = parseInt(web3.toWei($("#sendDecoyInput").val(), "ether"));
     var hash;
     var numberPrice;
     var instance;
@@ -265,8 +264,8 @@ window.App = {
   },
 
   uncoverNumber: function() {
-    var number = document.getElementById("uncoverNumberInput").value;
-    var password = document.getElementById("uncoverPasswordInput").value;
+    var number = $("#uncoverNumberInput").val();
+    var password = $("#uncoverPasswordInput").val();
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
@@ -283,7 +282,7 @@ window.App = {
   },
 
   claimPrize: function(){
-    var roundNumber = document.getElementById("claimRoundNumberInput").value;
+    var roundNumber = $("#claimRoundNumberInput").val();
     var instance;
     return ContractAbstraction.deployed().then(function(_instance){
       instance = _instance;
@@ -300,22 +299,22 @@ window.App = {
   },
 
   getPastRoundStats: function() {
-    var roundId = document.getElementById("roundNumberInput").value - 1;
+    var roundId = $("#roundNumberInput").val() - 1;
     var roundData
     return getRoundStats(roundId).then(function(_roundData){
       roundData = _roundData;
       return getAllNumbers(roundId)
     }).then(function(allNumbers) {
       var isPrizeExpired = isExpired(roundData.startTime, rules.prizeExpiration);
-      document.getElementById("roundStartTime").innerHTML = timestampToDateTime(roundData.startTime);
-      document.getElementById("roundNumberCount").innerHTML = roundData.numberOfGuesses;
-      document.getElementById("roundUncoverCount").innerHTML = roundData.numberOfUncovers;
-      document.getElementById("roundValue").innerHTML = roundData.value + " ETH";
-      document.getElementById("roundWinnerNumber").innerHTML = roundData.smallestNumber;
-      document.getElementById("roundWinner").innerHTML = roundData.winner;
-      document.getElementById("roundAllNumbers").innerHTML = allNumbers;
-      document.getElementById("roundPrizeClaimed").innerHTML = roundData.prizeClaimed;
-      document.getElementById("roundPrizeExpired").innerHTML = isPrizeExpired;
+      $("#roundStartTime").html(timestampToDateTime(roundData.startTime));
+      $("#roundNumberCount").html(roundData.numberOfGuesses);
+      $("#roundUncoverCount").html(roundData.numberOfUncovers);
+      $("#roundValue").html(roundData.value + " ETH");
+      $("#roundWinnerNumber").html(roundData.smallestNumber);
+      $("#roundWinner").html(roundData.winner);
+      $("#roundAllNumbers").html(allNumbers);
+      $("#roundPrizeClaimed").html(roundData.prizeClaimed);
+      $("#roundPrizeExpired").html(isPrizeExpired);
     });
   },
 
@@ -329,12 +328,12 @@ window.App = {
 
   refreshRulesDisplay: function(){
     return getRules().then(function(rules){
-      document.getElementById("prizeCarryPercent").innerHTML = rules.prizeCarryPercent + "%";
-      document.getElementById("edgePercent").innerHTML = rules.edgePercent + "%";
-      document.getElementById("periodLength").innerHTML = timestampToTime(rules.periodLength);
-      document.getElementById("numberPrice").innerHTML = rules.numberPrice + " ETH";
-      document.getElementById("prizeExpiration").innerHTML = timestampToDays(rules.prizeExpiration);
-      document.getElementById("expirationEdgePercent").innerHTML = rules.expirationEdgePercent + "%";
+      $("#prizeCarryPercent").html(rules.prizeCarryPercent + "%");
+      $("#edgePercent").html(rules.edgePercent + "%");
+      $("#periodLength").html(timestampToTime(rules.periodLength));
+      $("#numberPrice").html(rules.numberPrice + " ETH");
+      $("#prizeExpiration").html(timestampToDays(rules.prizeExpiration));
+      $("#expirationEdgePercent").html(rules.expirationEdgePercent + "%");
     });
   },
 
@@ -346,12 +345,12 @@ window.App = {
       return getRoundStats(numberOfRounds - 1);
     }).then(function(_roundData){
       activeRoundData = _roundData;
-      document.getElementById("activeRoundNumber").innerHTML = numberOfRounds;
-      document.getElementById("activeRoundStartTime").innerHTML = timestampToDateTime(activeRoundData.startTime);
-      document.getElementById("activeRoundRemainingTime").innerHTML = timestampToTime( (activeRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
-      document.getElementById("activeRoundEndTime").innerHTML = timestampToDateTime(activeRoundData.startTime + rules.periodLength);
-      document.getElementById("activeRoundNumberCount").innerHTML = activeRoundData.numberOfGuesses;
-      document.getElementById("activeRoundValue").innerHTML = activeRoundData.value + " ETH";
+      $("#activeRoundNumber").html(numberOfRounds.toString());
+      $("#activeRoundStartTime").html(timestampToDateTime(activeRoundData.startTime));
+      $("#activeRoundRemainingTime").html(timestampToTime( (activeRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) ));
+      $("#activeRoundEndTime").html(timestampToDateTime(activeRoundData.startTime + rules.periodLength));
+      $("#activeRoundNumberCount").html(activeRoundData.numberOfGuesses);
+      $("#activeRoundValue").html(activeRoundData.value + " ETH");
     });
   },
 
@@ -363,15 +362,15 @@ window.App = {
       return getRoundStats(numberOfRounds - 2);
     }).then(function(_roundData){
       uncoverRoundData = _roundData;
-      document.getElementById("uncoverRoundNumber").innerHTML = numberOfRounds - 1;
-      document.getElementById("uncoverRoundStartTime").innerHTML = timestampToDateTime(uncoverRoundData.startTime);
-      document.getElementById("uncoverRoundRemainingTime").innerHTML = timestampToTime( (uncoverRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
-      document.getElementById("uncoverRoundEndTime").innerHTML = timestampToDateTime(uncoverRoundData.startTime + rules.periodLength);
-      document.getElementById("uncoverRoundNumberCount").innerHTML = uncoverRoundData.numberOfGuesses;
-      document.getElementById("uncoverRoundUncoverCount").innerHTML = uncoverRoundData.numberOfUncovers;
-      document.getElementById("uncoverRoundValue").innerHTML = uncoverRoundData.value + " ETH";
-      document.getElementById("uncoverRoundWinnerNumber").innerHTML = uncoverRoundData.smallestNumber;
-      document.getElementById("uncoverRoundWinner").innerHTML = uncoverRoundData.winner;
+      $("#uncoverRoundNumber").html(numberOfRounds - 1);
+      $("#uncoverRoundStartTime").html(timestampToDateTime(uncoverRoundData.startTime));
+      $("#uncoverRoundRemainingTime").html(timestampToTime( (uncoverRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) ));
+      $("#uncoverRoundEndTime").html(timestampToDateTime(uncoverRoundData.startTime + rules.periodLength));
+      $("#uncoverRoundNumberCount").html(uncoverRoundData.numberOfGuesses);
+      $("#uncoverRoundUncoverCount").html(uncoverRoundData.numberOfUncovers);
+      $("#uncoverRoundValue").html(uncoverRoundData.value + " ETH");
+      $("#uncoverRoundWinnerNumber").html(uncoverRoundData.smallestNumber);
+      $("#uncoverRoundWinner").html(uncoverRoundData.winner);
     });
   },
 
@@ -385,17 +384,17 @@ window.App = {
       lastClosedRoundData = _roundData;
       return getAllNumbers(numberOfRounds - 3)
     }).then(function(allNumbers) {
-      document.getElementById("lastClosedRoundNumber").innerHTML = numberOfRounds - 2;
-      document.getElementById("lastClosedRoundStartTime").innerHTML = timestampToDateTime(lastClosedRoundData.startTime);
-      document.getElementById("lastClosedRoundRemainingTime").innerHTML = timestampToTime( (lastClosedRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) );
-      document.getElementById("lastClosedRoundEndTime").innerHTML = timestampToDateTime( lastClosedRoundData.startTime + rules.periodLength);
-      document.getElementById("lastClosedRoundNumberCount").innerHTML = lastClosedRoundData.numberOfGuesses;
-      document.getElementById("lastClosedRoundUncoverCount").innerHTML = lastClosedRoundData.numberOfUncovers;
-      document.getElementById("lastClosedRoundValue").innerHTML = lastClosedRoundData.value + " ETH";
-      document.getElementById("lastClosedRoundWinnerNumber").innerHTML = lastClosedRoundData.smallestNumber;
-      document.getElementById("lastClosedRoundWinner").innerHTML = lastClosedRoundData.winner;
-      document.getElementById("lastClosedRoundAllNumbers").innerHTML = allNumbers;
-      document.getElementById("lastClosedRoundPrizeClaimed").innerHTML = lastClosedRoundData.prizeClaimed;
+      $("#lastClosedRoundNumber").html(numberOfRounds - 2);
+      $("#lastClosedRoundStartTime").html(timestampToDateTime(lastClosedRoundData.startTime));
+      $("#lastClosedRoundRemainingTime").html(timestampToTime( (lastClosedRoundData.startTime + rules.periodLength) - Math.floor(Date.now() / 1000) ));
+      $("#lastClosedRoundEndTime").html(timestampToDateTime( lastClosedRoundData.startTime + rules.periodLength));
+      $("#lastClosedRoundNumberCount").html(lastClosedRoundData.numberOfGuesses);
+      $("#lastClosedRoundUncoverCount").html(lastClosedRoundData.numberOfUncovers);
+      $("#lastClosedRoundValue").html(lastClosedRoundData.value + " ETH");
+      $("#lastClosedRoundWinnerNumber").html(lastClosedRoundData.smallestNumber);
+      $("#lastClosedRoundWinner").html(lastClosedRoundData.winner);
+      $("#lastClosedRoundAllNumbers").html(allNumbers);
+      $("#lastClosedRoundPrizeClaimed").html(lastClosedRoundData.prizeClaimed);
     });
   },
 
@@ -415,16 +414,16 @@ window.App = {
   },
 
   toggleSkipDisplay: function() {
-    var skip = document.getElementById("skip");
+    var skip = $("#skip");
     if(testMode){
-      skip.style.display = 'block';
+      skip.show();
     } else {
-        skip.style.display = 'none';
+      skip.hide();
     }
   },
 
   setMode: function() {
-    testMode = document.getElementById("testModeCheckbox").checked;
+    testMode = $("#testModeCheckbox").is(":checked");
     self.toggleSkipDisplay();
     if (testMode == true){
       ContractAbstraction = TestHelpers;
@@ -437,21 +436,21 @@ window.App = {
 
   calculateDecoy: function() {
     var numberPrice = rules.numberPrice;
-    document.getElementById("sendDecoyInput").value = numberPrice * Math.floor(Math.random() * 100);
+    $("#sendDecoyInput").val(numberPrice * Math.floor(Math.random() * 100));
     self.calculatePrice();
   },
 
   calculatePrice: function() {
-    if(document.getElementById("sendNumberInput").value && document.getElementById("sendDecoyInput").value) {
+    if($("#sendNumberInput").val() && $("#sendDecoyInput").val()) {
       var numberPrice = parseFloat(rules.numberPrice);
-      var number = parseFloat(document.getElementById("sendNumberInput").value);
-      var decoy = parseFloat(document.getElementById("sendDecoyInput").value);
-      document.getElementById("sendTransactionPrice").innerHTML = (number * numberPrice + decoy).toFixed(Math.ceil(Math.abs(getBaseLog(10, numberPrice)))) + " ETH";
+      var number = parseFloat($("#sendNumberInput").val());
+      var decoy = parseFloat($("#sendDecoyInput").val());
+      $("#sendTransactionPrice").html((number * numberPrice + decoy).toFixed(Math.ceil(Math.abs(getBaseLog(10, numberPrice)))) + " ETH");
     }
   },
 
   watchEvents: function() {
-    var feedTable = document.getElementById("liveFeed");
+    var feedTable = $("#liveFeed")[0];
     var helloWorld;
     ContractAbstraction.deployed().then(function(instance) {
       helloWorld = instance;
@@ -478,7 +477,7 @@ window.App = {
           }
 
           if (eventType == "prizePumped"){
-            tableHelper.addDataRow(feedTable, ["Prize Pumped", result.args.sender.substr(0, 9), "Value: " + web3.fromWei(result.args.value, 'ether') + " ETH"]);
+            tableHelper.addDataRow(feedTable, ["Prize Pumped", result.args.sender.substr(0, 9), "Value: " + web3.fromWei(result.args.val(), 'ether') + " ETH"]);
           }
 
           if (eventType == "newRoundStarted"){
@@ -496,7 +495,7 @@ window.App = {
 
 };
 
-window.addEventListener('load', function() {
+$(window).on('load', function() {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
   if (typeof web3 !== 'undefined') {
     console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
@@ -511,5 +510,4 @@ window.addEventListener('load', function() {
   App.start();
 
   App.watchEvents();
-
 });

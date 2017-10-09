@@ -16,7 +16,7 @@ var tableHelpers={
     columnList.map(this.createDataCell).forEach((cell) => {
       row.appendChild(cell);
     })
-    table.appendChild(row);
+    $(table).find("tr").eq(0).after(row);
   },
 
   addHeaderRow: function(table, columnHeaderList){

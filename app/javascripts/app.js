@@ -63,7 +63,7 @@ function getRoundStats(roundId) {
     prizeClaimed = _prizeClaimed;
     return instance.getRoundValue.call(roundId, {from: account});
   }).then(function(_value) {
-    _value = web3.fromWei(_value, "ether").toNumber();
+    value = web3.fromWei(_value, "ether").toNumber();
     var result = {
       startTime: startTime,
       winner: winner,

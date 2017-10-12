@@ -8,7 +8,7 @@ contract LowestUniqueNumberGame {
     uint public stash;
     bool public deactivated = false;
     uint public deactivationTime;
-    Rules public rules = Rules({prizeCarryPercent: 10, edgePercent: 5, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 30 days, expirationEdgePercent: 50});
+    Rules public rules = Rules({prizeCarryPercent: 10, edgePercent: 0, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 30 days, expirationEdgePercent: 0});
     Round[] public roundList;
     Rules public newRules = rules;
     bool public ruleUpdateNeeded = false;

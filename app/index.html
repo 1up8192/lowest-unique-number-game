@@ -14,12 +14,16 @@
 <body>
   <h1>Smallest Number Game</h1>
   <br>
-  <div id="mode" style="display: none;">
+  <div id="ropsten">
+    <p style="color:red;"><strong>This is a test version running on the Ropsten testnet, read this on how to get Metamask, connect to Ropsten and get Ropsten ethers to play:</strong></p>
+    <a target="_blank" href="https://blog.bankex.org/how-to-buy-ethereum-using-metamask-ccea0703daec">https://blog.bankex.org/how-to-buy-ethereum-using-metamask-ccea0703daec</a>
+  </div>
+  <div id="mode" style="display: none;"> <!--ropsten-->
     <label for="testModeCheckbox" >Test mode </label>
     <input type="checkbox" id="testModeCheckbox" defaultValue="checked" onclick="App.setMode()"></input>
     <br>
   </div >
-  <div id="skip" style="display: none;">
+  <div id="skip" style="display: none;"> <!--ropsten-->
     <button id="skipRoundButton" onclick="App.skipRound()">Skip Round</button>
     <br>
   </div >

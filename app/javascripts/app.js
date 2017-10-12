@@ -7,7 +7,7 @@ import { default as contract } from 'truffle-contract';
 
 // Import our contract artifacts and turn them into usable abstractions.
 import lung_artifacts from '../../build/contracts/LowestUniqueNumberGame.json';
-//import th_artifacts from '../../build/contracts/TestHelpers.json';
+//import th_artifacts from '../../build/contracts/TestHelpers.json'; //ropsten
 
 import * as tableHelper from './tableHelper.js';
 
@@ -17,7 +17,7 @@ var asyncWhile = require("async-while");
 
 // HelloWorld is our usable abstraction, which we'll use through the code below.
 var LowestUniqueNumberGame = contract(lung_artifacts);
-//var TestHelpers = contract(th_artifacts)
+//var TestHelpers = contract(th_artifacts) //ropsten
 var ContractAbstraction = LowestUniqueNumberGame;
 
 // The following code is simple to show off interacting with your contracts.
@@ -153,13 +153,14 @@ function isExpired(startTime, expiryTime){
 
 function getAllNumbers(roundID) {
   var instance;
-  var results = [];
+  if (roundID < 0) return [];
   return ContractAbstraction.deployed().then(function(_instance){
     instance = _instance;
     return instance.getAllNumbers.call(roundID, {from: account});
   }).then(function(result) {
+    console.log(result);
     var allNumbers = result.split(",");
-    allNumbers.sort();
+    if (allNumbers) allNumbers.sort();
     console.log("get all numbers")
     console.log(allNumbers);
     self.setStatus("Transaction complete!");
@@ -226,8 +227,8 @@ window.App = {
       console.log("accounts: ");
       console.log(accounts);
 
-      //self.setMode();
-      ContractAbstraction = LowestUniqueNumberGame;
+      //self.setMode(); //ropsten
+      ContractAbstraction = LowestUniqueNumberGame; //ropsten
 
       self.refreshAllStats();
 
@@ -384,7 +385,7 @@ window.App = {
       return getRoundStats(numberOfRounds - 3);
     }).then(function(_roundData){
       lastClosedRoundData = _roundData;
-      return getAllNumbers(numberOfRounds - 3)
+      return getAllNumbers(numberOfRounds - 3);
     }).then(function(allNumbers) {
       $("#lastClosedRoundNumber").html(numberOfRounds - 2);
       $("#lastClosedRoundStartTime").html(timestampToDateTime(lastClosedRoundData.startTime));
@@ -424,7 +425,7 @@ window.App = {
     }
   },
 
-  /*setMode: function() {
+  /*setMode: function() { //ropsten
     testMode = $("#testModeCheckbox").is(":checked");
     self.toggleSkipDisplay();
     if (testMode == true){

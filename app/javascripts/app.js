@@ -7,7 +7,7 @@ import { default as contract } from 'truffle-contract';
 
 // Import our contract artifacts and turn them into usable abstractions.
 import lung_artifacts from '../../build/contracts/LowestUniqueNumberGame.json';
-import th_artifacts from '../../build/contracts/TestHelpers.json';
+//import th_artifacts from '../../build/contracts/TestHelpers.json';
 
 import * as tableHelper from './tableHelper.js';
 
@@ -17,7 +17,7 @@ var asyncWhile = require("async-while");
 
 // HelloWorld is our usable abstraction, which we'll use through the code below.
 var LowestUniqueNumberGame = contract(lung_artifacts);
-var TestHelpers = contract(th_artifacts)
+//var TestHelpers = contract(th_artifacts)
 var ContractAbstraction = LowestUniqueNumberGame;
 
 // The following code is simple to show off interacting with your contracts.
@@ -204,7 +204,7 @@ window.App = {
 
     // Bootstrap the MetaCoin abstraction for Use.
     LowestUniqueNumberGame.setProvider(web3.currentProvider);
-    TestHelpers.setProvider(web3.currentProvider);
+    //TestHelpers.setProvider(web3.currentProvider);
 
 
     // Get the initial account balance so it can be displayed.
@@ -226,7 +226,9 @@ window.App = {
       console.log("accounts: ");
       console.log(accounts);
 
-      self.setMode();
+      //self.setMode();
+      ContractAbstraction = LowestUniqueNumberGame;
+
       self.refreshAllStats();
 
     });
@@ -422,7 +424,7 @@ window.App = {
     }
   },
 
-  setMode: function() {
+  /*setMode: function() {
     testMode = $("#testModeCheckbox").is(":checked");
     self.toggleSkipDisplay();
     if (testMode == true){
@@ -432,7 +434,7 @@ window.App = {
       ContractAbstraction = LowestUniqueNumberGame;
       console.log("game mode");
     }
-  },
+  },*/
 
   calculateDecoy: function() {
     var numberPrice = rules.numberPrice;

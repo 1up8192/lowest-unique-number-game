@@ -4,14 +4,14 @@ import "./MinHeap.sol";
 
 contract LowestUniqueNumberGame {
 
-    address public owner;
-    uint public stash;
-    bool public deactivated = false;
-    uint public deactivationTime;
-    Rules public rules = Rules({prizeCarryPercent: 10, edgePercent: 0, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 30 days, expirationEdgePercent: 0});
-    Round[] public roundList;
-    Rules public newRules = rules;
-    bool public ruleUpdateNeeded = false;
+    address internal owner;
+    uint internal stash;
+    bool internal deactivated = false;
+    uint internal deactivationTime;
+    Rules internal rules = Rules({prizeCarryPercent: 10, edgePercent: 0, periodLength: 1 days, numberPrice: 0.001 ether, prizeExpiration: 30 days, expirationEdgePercent: 0});
+    Round[] internal roundList;
+    Rules internal newRules = rules;
+    bool internal ruleUpdateNeeded = false;
 
     struct Rules{
         uint prizeCarryPercent;
@@ -23,7 +23,7 @@ contract LowestUniqueNumberGame {
 
     }
 
-    MinHeap.Heap candidatesHeap;
+    MinHeap.Heap internal candidatesHeap;
 
     struct Round{
         mapping(bytes32=>address) secretNumberAddresses;
@@ -49,7 +49,7 @@ contract LowestUniqueNumberGame {
     event newRoundStarted(uint timestamp);
 
 
-    function LowestUniqueNumberGame() {
+    function LowestUniqueNumberGame() internal {
         owner = msg.sender;
     }
 
@@ -63,7 +63,7 @@ contract LowestUniqueNumberGame {
         _;
     }
 
-    function checkForActiveGamePeriod() constant returns (bool){
+    function checkForActiveGamePeriod() public constant returns (bool){
         bool result;
         if (roundList.length == 0)
         {
@@ -76,14 +76,14 @@ contract LowestUniqueNumberGame {
         return result;
     }
 
-    function isPrizeExpired(uint roundId) constant returns (bool){
+    function isPrizeExpired(uint roundId) public constant returns (bool){
         if( block.timestamp > roundList[roundId].startTime + 2 days + rules.prizeExpiration){
             return true;
         }
         return false;
     }
 
-    function hashNumber(uint number, string password) constant returns (bytes32){
+    function hashNumber(uint number, string password) public constant returns (bytes32){
         require(number != 0);
         return sha3(number, password, msg.sender);
     }
@@ -124,7 +124,7 @@ contract LowestUniqueNumberGame {
         newRoundStarted(block.timestamp);
     }
 
-    function submitSecretNumber(bytes32 hash) payable onlyActive{
+    function submitSecretNumber(bytes32 hash) public payable onlyActive{
         if (!checkForActiveGamePeriod()) {
             startNewRound();
         }
@@ -137,7 +137,7 @@ contract LowestUniqueNumberGame {
         numberSubmitted(block.timestamp, hash, msg.sender);
     }
 
-    function uncoverNumber(uint number, string password) onlyActive{
+    function uncoverNumber(uint number, string password) public onlyActive{
         if (!checkForActiveGamePeriod()) {
             startNewRound();
         }
@@ -174,13 +174,13 @@ contract LowestUniqueNumberGame {
         numberUncovered(block.timestamp, number, msg.sender);
     }
 
-    function checkIfClaimable(uint roundID) constant returns (bool){
+    function checkIfClaimable(uint roundID) public constant returns (bool){
       bool result = (roundID != SafeMath.safeSub(roundList.length, 1) && /*it can not be the most recent round*/
       (roundID != SafeMath.safeSub(roundList.length, 2) || !checkForActiveGamePeriod()) ); /*it can only be the second recent round if there is no active game in the first round*/
       return result;
     }
 
-    function claimPrize(uint roundID) {
+    function claimPrize(uint roundID) public {
         require(checkIfClaimable(roundID));
         require(!roundList[roundID].prizeClaimed);
         require(msg.sender == roundList[roundID].winner);
@@ -190,7 +190,7 @@ contract LowestUniqueNumberGame {
 
     }
 
-    function pumpUp() payable onlyActive{
+    function pumpUp() public payable onlyActive{
         if (!checkForActiveGamePeriod()) {
             startNewRound();
         }
@@ -198,7 +198,7 @@ contract LowestUniqueNumberGame {
         prizePumped(block.timestamp, msg.value, msg.sender);
     }
 
-    function recyclePrize(uint roundID) onlyActive {
+    function recyclePrize(uint roundID) public onlyActive {
         require(isPrizeExpired(roundID));
         require(! roundList[roundID].prizeClaimed);
         uint netRecycleValue = roundList[roundID].value / 100 * (100 - rules.expirationEdgePercent);
@@ -229,7 +229,7 @@ contract LowestUniqueNumberGame {
         }
     }
 
-    function finalPayout(uint roundID, bytes32 hash) {
+    function finalPayout(uint roundID, bytes32 hash) public {
         require(deactivated);
         require(roundID == SafeMath.safeSub(roundList.length, 1) || roundID == SafeMath.safeSub(roundList.length, 2)); // only last two rounds, older rounds have only prizes for the winners
         require(roundList[roundID].secretNumberAddresses[hash] == msg.sender);
@@ -240,7 +240,7 @@ contract LowestUniqueNumberGame {
         roundList[roundID].payments[hash]=0;
     }
 
-    function cashOut(uint amount) onlyOwner{
+    function cashOut(uint amount) public onlyOwner{
         uint actualAmount;
         if(amount == 0 || amount > stash){
             actualAmount = stash;
@@ -251,43 +251,43 @@ contract LowestUniqueNumberGame {
         stashPayout(block.timestamp, actualAmount);
     }
 
-    function deactivate() onlyOwner{
+    function deactivate() public onlyOwner{
         deactivated = true;
         deactivationTime = block.timestamp;
     }
 
-    function kill() onlyOwner{
+    function kill() public onlyOwner{
         require(deactivationTime + 10 days < block.timestamp);
         selfdestruct(owner);
     }
 
-    function setPrizeCarryPercent(uint newPrizeCarryPercent) onlyOwner {
+    function setPrizeCarryPercent(uint newPrizeCarryPercent) public onlyOwner {
         newRules.prizeCarryPercent = newPrizeCarryPercent;
         ruleUpdateNeeded = true;
     }
 
-    function setEdgePercent(uint newEdgePercent) onlyOwner {
+    function setEdgePercent(uint newEdgePercent) public onlyOwner {
         newRules.edgePercent = newEdgePercent;
         ruleUpdateNeeded = true;
     }
 
-    function setPeriodLength(uint newPeriodLength) onlyOwner {
+    function setPeriodLength(uint newPeriodLength) public onlyOwner {
         newRules.periodLength = newPeriodLength;
         ruleUpdateNeeded = true;
     }
 
-    function setNumberPrice(uint newNumberPrice) onlyOwner {
+    function setNumberPrice(uint newNumberPrice) public onlyOwner {
         newRules.numberPrice = newNumberPrice;
         ruleUpdateNeeded = true;
     }
 
-    function setPrizeExpiration(uint numberOfDays) onlyOwner{
+    function setPrizeExpiration(uint numberOfDays) public onlyOwner{
         require(numberOfDays > 1);
         newRules.prizeExpiration = numberOfDays * 1 days;
         ruleUpdateNeeded = true;
     }
 
-    function setExpirationEdgePercent(uint newExpirationEdgePercent) onlyOwner{
+    function setExpirationEdgePercent(uint newExpirationEdgePercent) public onlyOwner{
         newRules.expirationEdgePercent = newExpirationEdgePercent;
         ruleUpdateNeeded = true;
     }
@@ -297,67 +297,67 @@ contract LowestUniqueNumberGame {
         ruleUpdateNeeded = false;
     }
 
-    function getWinner(uint roundID) constant returns (address){
+    function getWinner(uint roundID) public constant returns (address){
         return roundList[roundID].winner;
     }
 
-    function getPrizeCarryPercent() constant returns (uint) {
+    function getPrizeCarryPercent() public constant returns (uint) {
         return rules.prizeCarryPercent;
     }
 
-    function getEdgePercent() constant returns (uint) {
+    function getEdgePercent() public constant returns (uint) {
         return rules.edgePercent;
     }
 
-    function getPeriodLength() constant returns (uint) {
+    function getPeriodLength() public constant returns (uint) {
         return rules.periodLength;
     }
 
-    function getPrizeExpiration() constant returns (uint) {
+    function getPrizeExpiration() public constant returns (uint) {
         return rules.prizeExpiration;
     }
 
-    function getExpirationEdgePercent() constant returns (uint) {
+    function getExpirationEdgePercent() public constant returns (uint) {
         return rules.expirationEdgePercent;
     }
 
-    function getNumberPrice() constant returns (uint) {
+    function getNumberPrice() public constant returns (uint) {
         return rules.numberPrice;
     }
 
-    function getNumberOfRounds() constant returns (uint) {
+    function getNumberOfRounds() public constant returns (uint) {
         return roundList.length;
     }
 
-    function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) constant returns (address){
+    function getSenderByRoundIDAndHash(uint roundID, bytes32 hash) public constant returns (address){
         return roundList[roundID].secretNumberAddresses[hash];
     }
 
-    function getRoundValue(uint roundID) constant returns (uint){
+    function getRoundValue(uint roundID) public constant returns (uint){
         return roundList[roundID].value;
     }
 
-    function getStartTime(uint roundID) constant returns (uint){
+    function getStartTime(uint roundID) public constant returns (uint){
         return roundList[roundID].startTime;
     }
 
-    function getSmallestNumber(uint roundID) constant returns (uint){
+    function getSmallestNumber(uint roundID) public constant returns (uint){
         return roundList[roundID].smallestNumber;
     }
 
-    function getNumberOfGuesses(uint roundID) constant returns (uint){
+    function getNumberOfGuesses(uint roundID) public constant returns (uint){
         return roundList[roundID].numberOfGuesses;
     }
 
-    function getNumberOfUncovers(uint roundID) constant returns (uint){
+    function getNumberOfUncovers(uint roundID) public constant returns (uint){
         return roundList[roundID].numbersUncoveredUnsorted.length;
     }
 
-    function getUncoveredNumber(uint roundID, uint i) constant returns (uint){
+    function getUncoveredNumber(uint roundID, uint i) public constant returns (uint){
         return roundList[roundID].numbersUncoveredUnsorted[i];
     }
 
-    function getAllNumbers(uint roundID) constant returns (string){
+    function getAllNumbers(uint roundID) public constant returns (string){
         uint length = roundList[roundID].numbersUncoveredUnsorted.length;
         string memory result = "";
         if (length > 0){
@@ -370,11 +370,11 @@ contract LowestUniqueNumberGame {
         return result;
     }
 
-    function uintToString(uint n) constant returns (string){
+    function uintToString(uint n) internal constant returns (string){
         return bytes32ToString(uintToBytes(n));
     }
 
-    function uintToBytes(uint v) constant returns (bytes32 ret) {
+    function uintToBytes(uint v) public constant returns (bytes32 ret) {
         if (v == 0) {
             ret = '0';
         }
@@ -388,7 +388,7 @@ contract LowestUniqueNumberGame {
         return ret;
     }
 
-    function bytes32ToString(bytes32 x) constant returns (string) {
+    function bytes32ToString(bytes32 x) internal constant returns (string) {
         bytes memory bytesString = new bytes(32);
         uint charCount = 0;
         for (uint j = 0; j < 32; j++) {
@@ -405,7 +405,7 @@ contract LowestUniqueNumberGame {
         return string(bytesStringTrimmed);
     }
 
-    function strConcat(string a, string b) constant returns (string){
+    function strConcat(string a, string b) internal constant returns (string){
         bytes memory bytesA = bytes(a);
         bytes memory bytesB = bytes(b);
         string memory result = new string(bytesA.length + bytesB.length);
@@ -418,7 +418,7 @@ contract LowestUniqueNumberGame {
 
 
 
-    function getPrizeClaimed(uint roundID) constant returns (bool){
+    function getPrizeClaimed(uint roundID) public constant returns (bool){
         return roundList[roundID].prizeClaimed;
     }
 

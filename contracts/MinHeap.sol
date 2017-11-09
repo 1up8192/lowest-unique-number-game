@@ -40,7 +40,7 @@ library MinHeap{
         }
     }
 
-    function removeNumber(Heap storage self, uint n){
+    function removeNumber(Heap storage self, uint n) internal {
         uint i = findIndex(self, n);
         remove(self, i);
     }
@@ -76,7 +76,7 @@ library MinHeap{
         self.heap[parent(i)] = temp;
     }
 
-    function smallestOf3(Heap storage self, uint i) constant returns (uint){
+    function smallestOf3(Heap storage self, uint i) internal constant returns (uint){
         if ( (leftChild(i) >= self.heap.length || self.heap[i] < self.heap[leftChild(i)]) && (rightChild(i) >= self.heap.length || self.heap[i] < self.heap[rightChild(i)]) ) return i;
         if ( (leftChild(i) < self.heap.length) && (self.heap[leftChild(i)] < self.heap[rightChild(i)]) ) return self.heap[leftChild(i)];
         return self.heap[rightChild(i)];

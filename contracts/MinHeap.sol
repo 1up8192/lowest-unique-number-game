@@ -20,12 +20,12 @@ library MinHeap{
         return i*2+2;
     }
 
-    function min(Heap storage self) constant returns (uint){
+    function min(Heap storage self) public constant returns (uint){
         if(self.heap.length == 0) revert();
         return self.heap[0];
     }
 
-    function insert(Heap storage self, uint n) {
+    function insert(Heap storage self, uint n) public {
         self.heap.push(n);
         bubbleUp(self);
     }
@@ -40,7 +40,7 @@ library MinHeap{
         }
     }
 
-    function removeNumber(Heap storage self, uint n) internal {
+    function removeNumber(Heap storage self, uint n) public {
         uint i = findIndex(self, n);
         remove(self, i);
     }
